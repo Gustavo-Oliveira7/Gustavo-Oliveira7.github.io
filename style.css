@@ -41,3 +41,28 @@ nav a:hover { /* Altera o comportamento do elemento qnd o mouse está por cima*/
 }
 
 
+#nome{
+    text-align: center;
+}
+.fotodescrição{
+    display: flex;
+    padding: 20px;
+    text-align: center;
+}
+
+.fotoperfil {
+    vertical-align: baseline;
+    width: 250px;
+    border: 4px solid;
+    border-radius: 180px;
+}
+
+.descrição {
+	display: inline-block;
+	vertical-align: top;
+	width: 25%;
+	margin-right: 15%;
+}
+
+
+
