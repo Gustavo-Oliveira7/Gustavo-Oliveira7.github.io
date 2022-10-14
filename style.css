@@ -1,0 +1,43 @@
+header {
+	background: #17181A;
+	padding: 20px 0;
+}
+main {
+	width: 940px;
+	margin: 0 auto;
+}
+
+.caixamenu {
+	position: relative;
+	width: 940px;
+	padding: 0 auto;
+}
+
+nav {
+	position: static;
+    text-align: center;
+	top: 0px;
+	right: 0;
+}
+
+nav li {
+	display: inline;
+	margin: 0 0 0 20px;
+
+}
+
+nav a {
+	text-transform: uppercase;
+	color: #DAA520;
+	font-weight: bold;
+	font-size: 28px;
+	text-decoration: none;
+
+}
+
+nav a:hover { /* Altera o comportamento do elemento qnd o mouse está por cima*/
+	color: #ffffff;
+	text-decoration: underline;
+}
+
+
