@@ -1,18 +1,17 @@
-header {
-	background: #17181A;
-	padding: 20px 0;
+.cabeçalho{
+	display: flex;
+	justify-content: space-between;
 	align-items: center;
+	background-color: black;
+	padding: 15px;
+	
 }
-main {
-	width: 940px;
-	margin: 0 auto;
-}
-
-.caixamenu {
+.divcabeçalho{
 	position: relative;
-	width: 940px;
-	padding: 0 auto;
-
+	display: flex;
+	margin-left: auto;
+	margin-right: auto;
+	align-items: center;
 }
 nav{
 	position: static;
@@ -39,5 +38,3 @@ nav a:hover { /* Altera o comportamento do elemento qnd o mouse está por cima*/
 	color: #ffffff;
 	text-decoration: underline;
 }
-
-
