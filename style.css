@@ -1,6 +1,7 @@
 header {
 	background: #17181A;
 	padding: 20px 0;
+	align-items: center;
 }
 main {
 	width: 940px;
@@ -13,7 +14,7 @@ main {
 	padding: 0 auto;
 
 }
-nav {
+nav{
 	position: static;
     text-align: center;
 	top: 0px;
@@ -23,7 +24,6 @@ nav {
 nav li {
 	display: inline;
 	margin: 0 0 0 20px;
-
 }
 
 nav a {
@@ -39,30 +39,5 @@ nav a:hover { /* Altera o comportamento do elemento qnd o mouse está por cima*/
 	color: #ffffff;
 	text-decoration: underline;
 }
-
-
-#nome{
-    text-align: center;
-}
-.fotodescrição{
-    display: flex;
-    padding: 20px;
-    text-align: center;
-}
-
-.foto {
-    vertical-align: baseline;
-    width: 250px;
-    border: 4px solid;
-    border-radius: 180px;
-}
-
-.descrição {
-	display: inline-block;
-	vertical-align: top;
-	width: 25%;
-	margin-right: 15%;
-}
-
 
 
