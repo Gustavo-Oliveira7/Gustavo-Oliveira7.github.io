@@ -31,21 +31,23 @@ nav a {
 	font-weight: bold;
 	font-size: 28px;
 	text-decoration: none;
-
+	padding: 5px;
 }
 
 nav a:hover { /* Altera o comportamento do elemento qnd o mouse está por cima*/
 	color: #ffffff;
 	text-decoration: underline;
+
 }
 
 .fotodescrição{
-	margin-top: 25px;
-	padding: 20px;
 	display: flex;
 	justify-content: center;
 	padding: 25px;
-	
+	font-family: monospace;
+	font-size: 15px;
+	margin: 25px 15% ;
+	align-items: center;
 }
 
 .descrição{
@@ -64,5 +66,6 @@ nav a:hover { /* Altera o comportamento do elemento qnd o mouse está por cima*/
 	color: black;
 	text-align: center;
 	font-size: 40px;
-	font-family: fantasy;
+	font-family: monospace;
+	margin-top: 25px;
 }
