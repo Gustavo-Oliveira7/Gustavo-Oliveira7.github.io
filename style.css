@@ -2,9 +2,17 @@
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	background-color: black;
+	/* background-color: black; */
+	background-color: #44475a;
 	padding: 15px;
+	box-shadow: 1px 1px 2px 1px rgba(161, 161, 161, 0.5);
+
 	
+}
+
+html{
+	background-color: #282a36;
+
 }
 .divcabeçalho{
 	position: relative;
@@ -12,6 +20,7 @@
 	margin-left: auto;
 	margin-right: auto;
 	align-items: center;
+	
 }
 nav{
 	position: static;
@@ -27,7 +36,7 @@ nav li {
 
 nav a {
 	text-transform: uppercase;
-	color: #DAA520;
+	color: #f1fa8c;
 	font-weight: bold;
 	font-size: 28px;
 	text-decoration: none;
@@ -35,7 +44,7 @@ nav a {
 }
 
 nav a:hover { /* Altera o comportamento do elemento qnd o mouse está por cima*/
-	color: #ffffff;
+	color: #ff79c6;
 	text-decoration: underline;
 
 }
@@ -48,6 +57,7 @@ nav a:hover { /* Altera o comportamento do elemento qnd o mouse está por cima*/
 	font-size: 15px;
 	margin: 25px 15% ;
 	align-items: center;
+	color: #8be9fd;
 }
 
 .descrição{
@@ -63,9 +73,77 @@ nav a:hover { /* Altera o comportamento do elemento qnd o mouse está por cima*/
 
 #nome{
 	padding: 10px;
-	color: black;
+	color: #8be9fd;
 	text-align: center;
 	font-size: 40px;
 	font-family: monospace;
 	margin-top: 25px;
+}
+
+.gallery-img {
+	width: 150px;
+	height: 150px;
+	/* border: red 2px solid; */
+}
+
+.images {
+	margin: 10px auto 10px auto;
+	box-sizing: border-box;
+	font-family: 'Ubuntu';
+	display: flex;
+	align-content: center;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	flex-direction: row;
+	flex-wrap: wrap;
+	width: 45%;
+
+}
+
+.box-skills {
+	align-items: center;
+	border-radius: 15px;
+	box-shadow: 1px 1px 5px 4px rgba(161, 161, 161, 0.5);
+	display: flex;
+	flex-direction: column;
+	height: 220px;
+	justify-content: center;
+	margin: 0 10px 15px 0;
+	width: 180px;
+	color: #f1fa8c;
+	background:
+    linear-gradient(
+      to right,
+      rgba(100, 200, 200, 1),
+      rgba(100, 200, 200, 1)
+    ),
+    linear-gradient(
+      to right,
+      rgba(255, 0, 0, 1),
+      rgba(255, 0, 180, 1),
+      rgba(0, 100, 200, 1)
+  );
+	background-size: 100% 8px, 0 10px;
+	background-position: 100% 100%, 0 100%;
+	background-repeat: no-repeat;
+	transition: background-size 450ms;
+	margin-left: 10px;
+}
+.box-skills:hover{
+	color: #ff79c6;
+	background-size: 0 8px, 100% 8px;
+
+}
+
+
+#text-skills{
+	text-align: center;
+	font-size: 1.5rem;
+	color: #8be9fd;
+
+}
+
+h4{
+	margin-bottom: 15px;
 }
