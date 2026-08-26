@@ -26,23 +26,22 @@ export type Experiencia = {
 };
 
 export const experiencias: Experiencia[] = [
-  // ---- EDITE A PARTIR DAQUI -------------------------------
-  // Este e um exemplo com a estrutura pronta. Substitua pelos
-  // seus cargos reais (copie do seu LinkedIn) ou apague o bloco
-  // se ainda nao quiser mostrar experiencia profissional.
-  {
-    cargo: 'Desenvolvedor Backend',
-    empresa: 'Nome da empresa',
-    de: '01/2024',
-    ate: 'atual',
-    local: 'Remoto',
-    pontos: [
-      'Descreva aqui uma entrega concreta e o impacto dela.',
-      'Ex.: reduzi o tempo de resposta do endpoint X de 800ms para 120ms com cache e revisao de queries.',
-    ],
-    stack: ['Java', 'Spring Boot', 'PostgreSQL', 'Docker'],
-  },
-  // ---------------------------------------------------------
+  // Enquanto esta lista estiver vazia, a secao "Experiencia" nao aparece
+  // no site — melhor do que publicar texto de exemplo. Descomente o bloco
+  // abaixo, troque pelos seus dados reais e faca push.
+  //
+  // {
+  //   cargo: 'Desenvolvedor Backend',
+  //   empresa: 'Nome da empresa',
+  //   de: '01/2024',
+  //   ate: 'atual',
+  //   local: 'Remoto',
+  //   pontos: [
+  //     'Uma entrega concreta e o impacto dela.',
+  //     'Ex.: reduzi o p99 do endpoint de busca de 800ms para 120ms revisando queries e indices.',
+  //   ],
+  //   stack: ['Java', 'Spring Boot', 'PostgreSQL', 'Docker'],
+  // },
 ];
 
 export type Formacao = {
@@ -53,12 +52,14 @@ export type Formacao = {
 };
 
 export const formacoes: Formacao[] = [
-  {
-    curso: 'Nome do curso / graduacao',
-    instituicao: 'Instituicao',
-    de: '01/2022',
-    ate: 'atual',
-  },
+  // Mesma logica: vazio = a secao nao aparece.
+  //
+  // {
+  //   curso: 'Analise e Desenvolvimento de Sistemas',
+  //   instituicao: 'Nome da instituicao',
+  //   de: '01/2022',
+  //   ate: 'atual',
+  // },
 ];
 
 export type Certificacao = {
