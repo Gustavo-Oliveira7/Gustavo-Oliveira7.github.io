@@ -1,39 +1,38 @@
-import { githubUser, projetosOcultos } from '../site.config';
+import { githubUser, hiddenProjects } from '../site.config';
 
 /**
- * Camada de integracao com a API do GitHub.
+ * GitHub integration.
  *
- * Roda em tempo de BUILD (o site gerado ja sai com os dados dentro do HTML,
- * entao carrega rapido e o Google indexa). O workflow do GitHub Actions
- * reconstroi o site de tempos em tempos, o que mantem tudo atualizado
- * sem voce fazer nada. A pagina /projetos ainda faz um refresh no
- * navegador para pegar mudancas que aconteceram desde o ultimo build.
+ * Runs at BUILD time, so the generated HTML already contains the data:
+ * fast to load and indexable. A scheduled GitHub Actions run rebuilds the
+ * site periodically, which keeps it current without any manual step. The
+ * /work page additionally refreshes counts in the browser.
  *
- * Se a API falhar (rate limit, rede fora), o build NAO quebra: as funcoes
- * devolvem dados vazios e a pagina mostra um estado de fallback.
+ * If the API is unavailable (rate limit, network), the build does NOT fail:
+ * these functions return empty data and the pages fall back gracefully.
  */
 
 export type Repo = {
-  nome: string;
-  descricao: string | null;
+  name: string;
+  description: string | null;
   url: string;
   homepage: string | null;
-  linguagem: string | null;
-  estrelas: number;
+  language: string | null;
+  stars: number;
   forks: number;
-  topicos: string[];
-  atualizadoEm: string;
-  arquivado: boolean;
+  topics: string[];
+  updatedAt: string;
+  archived: boolean;
 };
 
-export type Perfil = {
-  nome: string | null;
+export type Profile = {
+  name: string | null;
   login: string;
   avatar: string;
   bio: string | null;
-  reposPublicos: number;
-  seguidores: number;
-  perfilUrl: string;
+  publicRepos: number;
+  followers: number;
+  url: string;
 };
 
 const API = 'https://api.github.com';
@@ -42,91 +41,96 @@ function headers(): HeadersInit {
   const h: Record<string, string> = {
     Accept: 'application/vnd.github+json',
     'X-GitHub-Api-Version': '2022-11-28',
-    'User-Agent': `${githubUser}-portfolio`,
+    'User-Agent': `${githubUser}-site`,
   };
-  // Em CI o Actions injeta GITHUB_TOKEN: sobe o limite de 60 para 5000 req/h.
-  // Localmente ele nao existe e a API responde no limite anonimo, o que basta.
+  // CI injects GITHUB_TOKEN, which lifts the rate limit from 60 to 5000/hour.
+  // Locally it is absent and the anonymous limit is plenty.
   const token = process.env.GITHUB_TOKEN;
   if (token) h.Authorization = `Bearer ${token}`;
   return h;
 }
 
-async function pegar<T>(caminho: string, fallback: T): Promise<T> {
+async function get<T>(path: string, fallback: T): Promise<T> {
   try {
-    const r = await fetch(`${API}${caminho}`, { headers: headers() });
-    if (!r.ok) {
-      console.warn(`[github] ${caminho} respondeu ${r.status} — usando fallback`);
+    const res = await fetch(`${API}${path}`, { headers: headers() });
+    if (!res.ok) {
+      console.warn(`[github] ${path} returned ${res.status} — falling back`);
       return fallback;
     }
-    return (await r.json()) as T;
-  } catch (e) {
-    console.warn(`[github] falha de rede em ${caminho} — usando fallback`, e);
+    return (await res.json()) as T;
+  } catch (err) {
+    console.warn(`[github] request to ${path} failed — falling back`, err);
     return fallback;
   }
 }
 
-/** Perfil publico do usuario. */
-export async function buscarPerfil(): Promise<Perfil | null> {
-  const d = await pegar<any>(`/users/${githubUser}`, null);
+export async function fetchProfile(): Promise<Profile | null> {
+  const d = await get<any>(`/users/${githubUser}`, null);
   if (!d) return null;
   return {
-    nome: d.name,
+    name: d.name,
     login: d.login,
     avatar: d.avatar_url,
     bio: d.bio,
-    reposPublicos: d.public_repos,
-    seguidores: d.followers,
-    perfilUrl: d.html_url,
+    publicRepos: d.public_repos,
+    followers: d.followers,
+    url: d.html_url,
   };
 }
 
 /**
- * Repositorios publicos, ja filtrados e ordenados pela ultima atualizacao.
- * Remove forks, arquivados e os listados em `projetosOcultos`.
+ * Public repositories, newest activity first.
+ * Forks, archived repositories and anything in `hiddenProjects` are dropped.
  */
-export async function buscarRepositorios(): Promise<Repo[]> {
-  const dados = await pegar<any[]>(
+export async function fetchRepos(): Promise<Repo[]> {
+  const raw = await get<any[]>(
     `/users/${githubUser}/repos?per_page=100&sort=updated&type=owner`,
     [],
   );
 
-  const ocultos = new Set(projetosOcultos.map((n) => n.toLowerCase()));
+  const hidden = new Set(hiddenProjects.map((n) => n.toLowerCase()));
 
-  return dados
+  return raw
     .filter((r) => !r.fork && !r.archived && !r.private)
-    .filter((r) => !ocultos.has(String(r.name).toLowerCase()))
+    .filter((r) => !hidden.has(String(r.name).toLowerCase()))
     .map(
       (r): Repo => ({
-        nome: r.name,
-        descricao: r.description,
+        name: r.name,
+        description: r.description,
         url: r.html_url,
         homepage: r.homepage || null,
-        linguagem: r.language,
-        estrelas: r.stargazers_count ?? 0,
+        language: r.language,
+        stars: r.stargazers_count ?? 0,
         forks: r.forks_count ?? 0,
-        topicos: r.topics ?? [],
-        atualizadoEm: r.pushed_at ?? r.updated_at,
-        arquivado: r.archived ?? false,
+        topics: r.topics ?? [],
+        updatedAt: r.pushed_at ?? r.updated_at,
+        archived: r.archived ?? false,
       }),
     )
-    .sort((a, b) => +new Date(b.atualizadoEm) - +new Date(a.atualizadoEm));
+    .sort((a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt));
 }
 
-/** Quantos repositorios por linguagem — alimenta o filtro da pagina /projetos. */
-export function contarLinguagens(repos: Repo[]): Array<{ nome: string; total: number }> {
-  const mapa = new Map<string, number>();
+/**
+ * Groups repositories by language, largest group first.
+ * Language is the honest way to organise this list — it is real information
+ * about the code, unlike an arbitrary ranking.
+ */
+export function groupByLanguage(repos: Repo[]): Array<{ language: string; repos: Repo[] }> {
+  const groups = new Map<string, Repo[]>();
   for (const r of repos) {
-    if (!r.linguagem) continue;
-    mapa.set(r.linguagem, (mapa.get(r.linguagem) ?? 0) + 1);
+    const key = r.language ?? 'Other';
+    const list = groups.get(key);
+    if (list) list.push(r);
+    else groups.set(key, [r]);
   }
-  return [...mapa.entries()]
-    .map(([nome, total]) => ({ nome, total }))
-    .sort((a, b) => b.total - a.total);
+  return [...groups.entries()]
+    .map(([language, list]) => ({ language, repos: list }))
+    .sort((a, b) => b.repos.length - a.repos.length);
 }
 
-/** '2026-08-20T10:00:00Z' -> '20 ago 2026' */
-export function formatarData(iso: string): string {
-  return new Date(iso).toLocaleDateString('pt-BR', {
+/** '2026-08-20T10:00:00Z' -> '20 Aug 2026' */
+export function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString('en-GB', {
     day: '2-digit',
     month: 'short',
     year: 'numeric',

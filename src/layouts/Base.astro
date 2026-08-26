@@ -1,26 +1,20 @@
 ---
-import { site } from '../site.config';
-import Cabecalho from '../components/Cabecalho.astro';
-import Rodape from '../components/Rodape.astro';
+import { site, links } from '../site.config';
+import Rail from '../components/Rail.astro';
 import '../styles/global.css';
 
 interface Props {
-  titulo?: string;
-  descricao?: string;
-  /** 'article' nas paginas de artigo, para as meta tags de compartilhamento */
-  tipo?: 'website' | 'article';
-  publicadoEm?: Date;
+  title?: string;
+  description?: string;
+  type?: 'website' | 'article';
+  publishedAt?: Date;
 }
 
-const {
-  titulo,
-  descricao = site.descricao,
-  tipo = 'website',
-  publicadoEm,
-} = Astro.props;
+const { title, description = site.description, type = 'website', publishedAt } = Astro.props;
 
-const tituloCompleto = titulo ? `${titulo} · ${site.nome}` : `${site.nome} — ${site.cargo}`;
-const urlCanonica = new URL(Astro.url.pathname, Astro.site);
+const fullTitle = title ? `${title} — ${site.name}` : `${site.name}, ${site.role}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const year = new Date().getFullYear();
 ---
 
 <!doctype html>
@@ -30,72 +24,106 @@ const urlCanonica = new URL(Astro.url.pathname, Astro.site);
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 
-    <title>{tituloCompleto}</title>
-    <meta name="description" content={descricao} />
-    <link rel="canonical" href={urlCanonica} />
-    <meta name="author" content={site.nome} />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="author" content={site.name} />
 
-    <!-- Compartilhamento em redes sociais -->
-    <meta property="og:type" content={tipo} />
-    <meta property="og:title" content={tituloCompleto} />
-    <meta property="og:description" content={descricao} />
-    <meta property="og:url" content={urlCanonica} />
-    <meta property="og:locale" content="pt_BR" />
-    <meta property="og:site_name" content={site.nome} />
-    {publicadoEm && <meta property="article:published_time" content={publicadoEm.toISOString()} />}
+    <meta property="og:type" content={type} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content={site.name} />
+    {publishedAt && <meta property="article:published_time" content={publishedAt.toISOString()} />}
     <meta name="twitter:card" content="summary_large_image" />
 
-    <link rel="alternate" type="application/rss+xml" title={`Artigos de ${site.nome}`} href="/rss.xml" />
+    <link rel="alternate" type="application/rss+xml" title={`${site.name} — Writing`} href="/rss.xml" />
     <meta name="generator" content={Astro.generator} />
 
-    <!-- Fontes -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Literata:ital,opsz,wght@0,7..72,400..600;1,7..72,400&family=Martian+Mono:wdth,wght@112.5,500;112.5,600&display=swap"
       rel="stylesheet"
     />
 
-    <!--
-      Aplica o tema salvo ANTES da primeira pintura da tela.
-      Sem isso o site pisca em branco ao carregar no tema escuro.
-    -->
+    <!-- Applies the saved theme before first paint, so the page never flashes. -->
     <script is:inline>
       (function () {
         try {
-          var salvo = localStorage.getItem('tema');
-          var claro = salvo
-            ? salvo === 'claro'
-            : window.matchMedia('(prefers-color-scheme: light)').matches;
-          if (claro) document.documentElement.setAttribute('data-tema', 'claro');
+          var saved = localStorage.getItem('theme');
+          var dark = saved
+            ? saved === 'dark'
+            : window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (dark) document.documentElement.setAttribute('data-theme', 'dark');
         } catch (e) {
-          /* modo privativo bloqueia o localStorage — segue no tema escuro */
+          /* private mode blocks storage — stay on the light default */
         }
       })();
     </script>
   </head>
 
   <body>
-    <a href="#conteudo" class="pular-para-conteudo">Pular para o conteudo</a>
-    <Cabecalho />
-    <main id="conteudo">
-      <slot />
-    </main>
-    <Rodape />
+    <a href="#main" class="skip">Skip to content</a>
+
+    <div class="frame">
+      <Rail />
+
+      <div class="column">
+        <main id="main" class="content">
+          <slot />
+        </main>
+
+        <footer class="colophon">
+          <p class="datum">
+            © {year} {site.name} — set in Martian Mono, Literata and IBM Plex Mono. Built with
+            Astro, published from
+            <a href={links.github + '/Gustavo-Oliveira7.github.io'} class="colophon__link"
+              >the repository</a
+            >.
+          </p>
+        </footer>
+      </div>
+    </div>
 
     <script>
-      const botao = document.getElementById('alternar-tema');
-      botao?.addEventListener('click', () => {
-        const raiz = document.documentElement;
-        const viraClaro = raiz.getAttribute('data-tema') !== 'claro';
-        raiz.setAttribute('data-tema', viraClaro ? 'claro' : 'escuro');
-        if (!viraClaro) raiz.removeAttribute('data-tema');
+      document.getElementById('theme-toggle')?.addEventListener('click', () => {
+        const root = document.documentElement;
+        const goingDark = root.getAttribute('data-theme') !== 'dark';
+        if (goingDark) root.setAttribute('data-theme', 'dark');
+        else root.removeAttribute('data-theme');
         try {
-          localStorage.setItem('tema', viraClaro ? 'claro' : 'escuro');
+          localStorage.setItem('theme', goingDark ? 'dark' : 'light');
         } catch (e) {
-          /* sem persistencia, o tema vale so para esta aba */
+          /* no persistence available; the choice lasts for this tab */
         }
       });
     </script>
   </body>
 </html>
+
+<style>
+  .column {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .colophon {
+    min-width: 0;
+    margin-top: auto;
+    padding: 2rem var(--pad-x) 2.25rem;
+    border-top: 1px solid var(--rule);
+    max-width: 62rem;
+  }
+
+  .colophon__link {
+    color: var(--ink-3);
+    border-bottom: 1px solid var(--rule-2);
+    transition: color var(--ease), border-color var(--ease);
+  }
+  .colophon__link:hover {
+    color: var(--signal);
+    border-bottom-color: var(--signal);
+  }
+</style>

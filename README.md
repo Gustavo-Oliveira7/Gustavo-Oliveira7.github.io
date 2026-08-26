@@ -1,144 +1,166 @@
-# Site pessoal — Gustavo Oliveira
+# gustavo-oliveira7.github.io
 
-Portfólio e blog de um desenvolvedor backend. Construído com [Astro](https://astro.build),
-publicado no GitHub Pages, com os projetos puxados automaticamente da API do GitHub.
+Personal site of a backend engineer: a project register pulled live from the GitHub API, and
+long-form writing about Java and Go. Built with [Astro](https://astro.build), published to GitHub
+Pages.
 
-**No ar:** https://gustavo-oliveira7.github.io
+**Live:** https://gustavo-oliveira7.github.io
 
 ---
 
-## Rodando na sua máquina
+## Running it locally
 
-O projeto exige **Node 22+** (o arquivo `.nvmrc` já aponta a versão certa).
+Requires **Node 22+**. The `.nvmrc` file pins the right version.
 
 ```bash
-nvm use          # troca para o Node 22 automaticamente
-npm install      # só na primeira vez
-npm run dev      # abre em http://localhost:4321
+nvm use          # switches to Node 22
+npm install      # first time only
+npm run dev      # http://localhost:4321
 ```
 
-Outros comandos:
-
-| Comando | O que faz |
+| Command | What it does |
 | --- | --- |
-| `npm run dev` | Servidor local com recarga automática |
-| `npm run build` | Gera o site em `dist/` |
-| `npm run preview` | Serve o `dist/` para conferir antes de publicar |
-| `npm run check` | Verifica erros de tipo nas páginas |
+| `npm run dev` | Local server with hot reload |
+| `npm run build` | Generates the site into `dist/` |
+| `npm run preview` | Serves `dist/` to check before publishing |
+| `npm run check` | Type-checks every page and component |
 
 ---
 
-## Publicando um artigo
+## Publishing a piece
 
-1. Crie um arquivo `.md` em `src/content/artigos/`.
-   O nome do arquivo vira a URL — `cache-distribuido.md` → `/artigos/cache-distribuido`.
+1. Add a `.md` file under `src/content/writing/`.
+   The filename becomes the URL — `caching-in-go.md` → `/writing/caching-in-go`.
 
-2. Comece com o cabeçalho (frontmatter):
+2. Start it with frontmatter:
 
 ```markdown
 ---
-titulo: "Título do artigo"
-resumo: "Uma ou duas frases. Aparece na listagem e no compartilhamento."
-data: 2026-09-01
+title: "Title of the piece"
+summary: "One or two sentences. Shown in listings and link previews. Plain text — no markdown."
+date: 2026-09-01
 tags: ["Go", "Performance"]
-rascunho: false
+draft: false
 ---
 
-Texto do artigo em Markdown. Blocos de código já saem com
-destaque de sintaxe para Java, Go, SQL, bash e outras.
+Body in Markdown. Code blocks are highlighted with a theme derived from
+the site's own palette, so they match the panels on the home page.
 ```
 
-3. Faça commit e push. **O site publica sozinho em cerca de 1 minuto.**
+3. Commit and push. **The site republishes itself in about a minute.**
 
 ```bash
-git add . && git commit -m "artigo: cache distribuído" && git push
+git add . && git commit -m "writing: caching in go" && git push
 ```
 
-Enquanto o texto não estiver pronto, use `rascunho: true` — o arquivo fica no repositório
-mas não aparece no site publicado.
+Set `draft: true` to keep a piece in the repository but off the published site.
 
 ---
 
-## Como os dados do GitHub se atualizam
+## How the GitHub data stays current
 
-Os repositórios **não** são escritos à mão em lugar nenhum. Existem três camadas:
+Repositories are never hand-written anywhere. Three layers keep them fresh:
 
-| Camada | Quando roda | O que atualiza |
+| Layer | Runs | Updates |
 | --- | --- | --- |
-| **Build** | A cada publicação | Tudo: repos novos, descrições, linguagens, estrelas |
-| **Cron do Actions** | A cada 6 horas | Reconstrói o site sem você fazer nada |
-| **Navegador** | Quando alguém abre `/projetos` | Estrelas, forks e data do último push, ao vivo |
+| **Build** | On every push | Everything: new repos, descriptions, languages, counts |
+| **Scheduled Action** | Every 6 hours | Rebuilds and republishes with no input from you |
+| **Browser** | When someone opens `/work` | Stars, forks and last-push dates, live |
 
-Ou seja: **um repositório novo aparece no site em no máximo 6 horas, sem você tocar em nada.**
-Se quiser que apareça agora:
+A new repository therefore appears within six hours, unattended. To publish one immediately:
 
 ```bash
 gh workflow run deploy.yml
 ```
 
-Para ajustar a frequência, edite o `cron` em [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml).
+Change the `cron` in [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) to adjust the
+frequency.
 
 ---
 
-## Sobre o LinkedIn
+## About LinkedIn
 
-**Não existe forma automática de puxar dados do LinkedIn.** A API pública deles foi
-descontinuada para perfis pessoais, e raspar o site viola os Termos de Uso — o risco real é a
-conta ser restringida. Qualquer serviço que prometa isso está fazendo scraping em nome de terceiros.
+**There is no automatic way to pull data from LinkedIn.** Their public API for personal profiles
+was retired, and scraping the site breaks the Terms of Service — the practical risk is your account
+being restricted. Any service promising otherwise is scraping on your behalf.
 
-Então o site faz duas coisas:
+So the site does two things instead:
 
-- **Linka** o perfil no cabeçalho, rodapé, home e em cada artigo;
-- **Espelha** a experiência em [`src/data/experiencia.ts`](src/data/experiencia.ts), mantido à mão.
+- **Links** the profile from the rail, from the home page and from every piece;
+- **Mirrors** your experience in [`src/data/experience.ts`](src/data/experience.ts), kept by hand.
 
-Quando você atualizar o LinkedIn, atualize esse arquivo e faça push. São dois minutos, e a
-vantagem é que o texto do site pode ser mais direto que o do LinkedIn.
+Update LinkedIn, update that file, push. Empty arrays hide their section, which is better than
+publishing placeholder text.
 
-Cada artigo também tem um botão **Compartilhar no LinkedIn**, que é o caminho que realmente
-gera visita: você publica aqui, divulga lá.
+Every piece also carries a **Share on LinkedIn** button — that is the loop that actually brings
+readers: publish here, post there.
 
 ---
 
-## O que editar, e onde
+## What to edit, and where
 
-| Quero mudar... | Arquivo |
+| To change | File |
 | --- | --- |
-| Nome, bio, links, e-mail | [`src/site.config.ts`](src/site.config.ts) |
-| Quais projetos ficam em destaque | `projetosDestaque` no mesmo arquivo |
-| Esconder um repositório do site | `projetosOcultos` no mesmo arquivo |
-| Minha stack / tecnologias | `stack` no mesmo arquivo |
-| Experiência, formação, certificados | [`src/data/experiencia.ts`](src/data/experiencia.ts) |
-| Cores, fontes, espaçamento | `:root` em [`src/styles/global.css`](src/styles/global.css) |
-| Itens do menu | `navegacao` em `src/site.config.ts` |
+| Name, role, headline, intro copy, links | [`src/site.config.ts`](src/site.config.ts) |
+| Which repositories are featured | `featuredProjects` in the same file |
+| Hide a repository from the site | `hiddenProjects` in the same file |
+| The toolkit table | `toolkit` in the same file |
+| Experience, education, certifications | [`src/data/experience.ts`](src/data/experience.ts) |
+| Colours, type, spacing | the `:root` block in [`src/styles/global.css`](src/styles/global.css) |
+| Code highlighting colours | [`astro.config.mjs`](astro.config.mjs) |
+| The Java/Go panels on the home page | [`src/components/SplitSignature.astro`](src/components/SplitSignature.astro) |
 
 ---
 
-## Estrutura
+## Design notes
+
+The direction is technical documentation rather than a marketing page, and three rules keep it
+coherent. Breaking them is what makes this kind of layout drift back into a template.
+
+1. **Martian Mono never sets a sentence.** It is the display voice — names, section headings,
+   labels. Reading text is always Literata; data and code are always IBM Plex Mono.
+2. **Colour is information.** Cobalt marks what is interactive. The Java and Go swatches encode
+   language and nothing else. There is no decorative colour.
+3. **Structure comes from rules and space, not cards.** No shadows, corners stay at 2px, and
+   repositories are grouped by language because that is true about the code — not numbered, which
+   would imply a sequence that does not exist.
+
+The signature element is the pair of panels on the home page: one operation written the way each
+language insists on writing it. That is the only place the design raises its voice.
+
+---
+
+## Structure
 
 ```
 src/
-├── site.config.ts        # ponto único de configuração
-├── content/artigos/      # os artigos, em Markdown
-├── data/experiencia.ts   # experiência profissional (espelho do LinkedIn)
+├── site.config.ts             # single source of personal config and copy
+├── content/writing/           # the pieces, in Markdown
+├── data/experience.ts         # experience (the LinkedIn mirror)
 ├── lib/
-│   ├── github.ts         # integração com a API do GitHub
-│   └── texto.ts          # tempo de leitura, datas, cores de linguagem
-├── layouts/Base.astro    # <head>, SEO, tema claro/escuro
-├── components/           # cabeçalho, rodapé, cards, ícones
+│   ├── github.ts              # GitHub API integration and grouping
+│   └── text.ts                # reading time, dates, language colours
+├── layouts/Base.astro         # head, SEO, theme, page frame
+├── components/
+│   ├── Rail.astro             # fixed left rail: identity and navigation
+│   ├── SplitSignature.astro   # the Java/Go panels
+│   ├── ProjectEntry.astro     # one repository row
+│   ├── WritingEntry.astro     # one piece row
+│   └── Icon.astro
 ├── pages/
-│   ├── index.astro       # home
-│   ├── projetos.astro    # repositórios, com filtro por linguagem
-│   ├── artigos/          # listagem + página de cada artigo
-│   ├── sobre.astro       # trajetória e stack
-│   ├── rss.xml.ts        # feed RSS
+│   ├── index.astro            # home
+│   ├── work.astro             # repositories, grouped by language
+│   ├── writing/               # index and individual pieces
+│   ├── about.astro
+│   ├── rss.xml.ts
 │   └── 404.astro
-└── styles/global.css     # design system
+└── styles/global.css          # design tokens and shared components
 ```
 
 ---
 
-## Domínio próprio (opcional)
+## Custom domain (optional)
 
-1. Crie `public/CNAME` com o domínio dentro (ex.: `gustavooliveira.dev`).
-2. Troque `site` em [`astro.config.mjs`](astro.config.mjs) para a nova URL.
-3. Aponte o DNS do domínio para o GitHub Pages e ative o domínio em **Settings → Pages**.
+1. Create `public/CNAME` containing the domain, e.g. `gustavooliveira.dev`.
+2. Update `site` in [`astro.config.mjs`](astro.config.mjs).
+3. Point the domain's DNS at GitHub Pages and set it under **Settings → Pages**.

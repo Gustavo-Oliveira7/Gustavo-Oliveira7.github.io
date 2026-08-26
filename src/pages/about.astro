@@ -1,0 +1,230 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import { site, links } from '../site.config';
+import { experience, education, certifications } from '../data/experience';
+import { fetchProfile } from '../lib/github';
+
+const profile = await fetchProfile();
+---
+
+<Base title="About" description={`Background, trajectory and contact details for ${site.name}.`}>
+  <section class="block">
+    <h1 class="statement page__title">About</h1>
+
+    <div class="bio lede">
+      <p>
+        I am a backend engineer working mainly in Java and Go. Most of what I build is the part of a
+        product nobody looks at directly: the API, the data model, the job that has to finish, the
+        query that has to stay fast once the table grows.
+      </p>
+      <p>
+        The two languages pull in opposite directions, and I like working across that seam. Java
+        gives you a deep ecosystem and a runtime that has seen everything; Go gives you a small
+        surface and forces every failure into the open. Choosing between them is rarely about speed.
+      </p>
+      <p>
+        What holds my attention is the detail that only shows up in production — where a connection
+        pool stalls, why p99 drifts while the average looks fine, when a framework is worth more than
+        a hundred lines of your own code. That is usually what ends up as a piece in{' '}
+        <a href="/writing" class="bio__link">Writing</a>.
+      </p>
+    </div>
+
+    <div class="rowf wrap g-sm about__acts">
+      <a href={`mailto:${links.email}`} class="frame-btn frame-btn--fill">
+        <Icon name="mail" size={14} /> Email me
+      </a>
+      <a href={links.linkedin} target="_blank" rel="noopener" class="frame-btn">
+        <Icon name="linkedin" size={13} /> LinkedIn
+      </a>
+      <a href={links.github} target="_blank" rel="noopener" class="frame-btn">
+        <Icon name="github" size={14} /> GitHub
+      </a>
+    </div>
+  </section>
+
+  {
+    profile && (
+      <section class="block">
+        <h2 class="h-section head">on github</h2>
+        <dl class="facts">
+          <div class="facts__item">
+            <dt class="tag">Handle</dt>
+            <dd class="facts__value">@{profile.login}</dd>
+          </div>
+          <div class="facts__item">
+            <dt class="tag">Public repositories</dt>
+            <dd class="facts__value">{profile.publicRepos}</dd>
+          </div>
+          <div class="facts__item">
+            <dt class="tag">Followers</dt>
+            <dd class="facts__value">{profile.followers}</dd>
+          </div>
+        </dl>
+      </section>
+    )
+  }
+
+  {
+    experience.length > 0 && (
+      <section class="block">
+        <h2 class="h-section head">experience</h2>
+        <div class="entries">
+          {experience.map((role) => (
+            <div class="spread record">
+              <p class="datum record__when">
+                {role.from} — {role.to}
+                {role.location && <span class="record__where">{role.location}</span>}
+              </p>
+              <div class="record__body">
+                <h3 class="record__title">{role.title}</h3>
+                <p class="datum record__company">{role.company}</p>
+                <ul class="record__points body-text">
+                  {role.points.map((point) => (
+                    <li>{point}</li>
+                  ))}
+                </ul>
+                {role.stack && role.stack.length > 0 && (
+                  <p class="dotted record__stack">
+                    {role.stack.map((s) => (
+                      <span>{s}</span>
+                    ))}
+                  </p>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  {
+    education.length > 0 && (
+      <section class="block">
+        <h2 class="h-section head">education</h2>
+        <div class="entries">
+          {education.map((study) => (
+            <div class="spread record">
+              <p class="datum record__when">
+                {study.from} — {study.to}
+              </p>
+              <div class="record__body">
+                <h3 class="record__title">{study.course}</h3>
+                <p class="datum record__company">{study.institution}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  {
+    certifications.length > 0 && (
+      <section class="block">
+        <h2 class="h-section head">certifications</h2>
+        <div class="entries">
+          {certifications.map((cert) => (
+            <div class="spread record">
+              <p class="datum record__when">{cert.year}</p>
+              <div class="record__body">
+                <h3 class="record__title">{cert.name}</h3>
+                <p class="datum record__company">{cert.issuer}</p>
+                {cert.url && (
+                  <a href={cert.url} target="_blank" rel="noopener" class="act record__cert">
+                    View credential <span class="act__arrow"><Icon name="arrow" size={13} /></span>
+                  </a>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    )
+  }
+</Base>
+
+<style>
+  .page__title { margin-bottom: 1.5rem; }
+
+  .bio {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .bio__link {
+    color: var(--ink);
+    border-bottom: 1px solid var(--signal);
+    transition: color var(--ease);
+  }
+  .bio__link:hover { color: var(--signal); }
+
+  .about__acts { margin-top: 2rem; }
+
+  .head { margin-bottom: 1.5rem; }
+
+  /* ---- Fact list ---- */
+  .facts { border-top: 1px solid var(--rule); }
+
+  .facts__item {
+    display: grid;
+    grid-template-columns: 13rem minmax(0, 1fr);
+    gap: 1rem;
+    padding-block: 0.85rem;
+    border-bottom: 1px solid var(--rule);
+    align-items: baseline;
+  }
+
+  .facts__value {
+    font-family: var(--data);
+    font-size: var(--t-sm);
+    color: var(--ink);
+  }
+
+  /* ---- Records ---- */
+  .record {
+    border-bottom: 1px solid var(--rule);
+    padding-block: 1.5rem;
+  }
+
+  .record__when {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding-top: 0.3rem;
+  }
+
+  .record__where { color: var(--rule-2); }
+
+  .record__title {
+    font-family: var(--read);
+    font-size: var(--t-lg);
+    font-weight: 500;
+    color: var(--ink);
+    line-height: 1.3;
+  }
+
+  .record__company { margin-top: 0.2rem; }
+
+  .record__points {
+    margin-top: 0.9rem;
+    padding-left: 1.05rem;
+    font-size: var(--t-sm);
+    line-height: 1.62;
+  }
+  .record__points li::marker { color: var(--signal); font-size: 0.8em; }
+  .record__points li + li { margin-top: 0.25rem; }
+
+  .record__stack { margin-top: 0.9rem; }
+  .record__cert { margin-top: 0.75rem; }
+
+  @media (max-width: 44rem) {
+    .facts__item {
+      grid-template-columns: 1fr;
+      gap: 0.3rem;
+    }
+  }
+</style>

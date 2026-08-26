@@ -1,0 +1,190 @@
+---
+import { site, links, nav } from '../site.config';
+import Icon from './Icon.astro';
+
+const here = Astro.url.pathname;
+const isHere = (href: string) => (href === '/' ? here === '/' : here.startsWith(href));
+---
+
+<aside class="rail">
+  <div class="rail__top">
+    <a href="/" class="rail__id">
+      <span class="mark rail__name"><span>Gustavo</span> <span>Oliveira</span></span>
+      <span class="tag rail__role">{site.role}</span>
+    </a>
+  </div>
+
+  <nav class="rail__nav" aria-label="Sections">
+    {
+      nav.map((item) => (
+        <a
+          href={item.href}
+          class:list={['rail__link', { 'rail__link--here': isHere(item.href) }]}
+          aria-current={isHere(item.href) ? 'page' : undefined}
+        >
+          {item.label}
+        </a>
+      ))
+    }
+  </nav>
+
+  <div class="rail__foot">
+    <div class="rail__out">
+      <a href={links.github} target="_blank" rel="noopener" class="rail__ext">
+        <Icon name="github" size={14} /> <span>GitHub</span>
+      </a>
+      <a href={links.linkedin} target="_blank" rel="noopener" class="rail__ext">
+        <Icon name="linkedin" size={13} /> <span>LinkedIn</span>
+      </a>
+      <a href={`mailto:${links.email}`} class="rail__ext">
+        <Icon name="mail" size={14} /> <span>Email</span>
+      </a>
+      <a href="/rss.xml" class="rail__ext">
+        <Icon name="rss" size={13} /> <span>RSS</span>
+      </a>
+    </div>
+
+    <button type="button" id="theme-toggle" class="rail__theme" aria-label="Switch colour theme">
+      <Icon name="contrast" size={14} />
+      <span>Theme</span>
+    </button>
+  </div>
+</aside>
+
+<style>
+  .rail {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    gap: 2.25rem;
+    padding: 2.75rem 1.75rem 2.25rem;
+    border-right: 1px solid var(--rule);
+    background: var(--ground);
+  }
+
+  .rail__id { display: block; }
+
+  .rail__name {
+    display: block;
+  }
+  .rail__name span {
+    display: block;
+    font-size: 1.0625rem;
+    color: var(--ink);
+    transition: color var(--ease);
+  }
+  .rail__id:hover .rail__name { color: var(--signal); }
+
+  .rail__role {
+    display: block;
+    margin-top: 0.7rem;
+  }
+
+  .rail__nav {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.1rem;
+  }
+
+  .rail__link {
+    font-family: var(--data);
+    font-size: var(--t-sm);
+    color: var(--ink-2);
+    padding: 0.3rem 0;
+    position: relative;
+    transition: color var(--ease);
+  }
+  .rail__link:hover { color: var(--ink); }
+
+  .rail__link--here { color: var(--signal); }
+  /* The current section is marked with a cobalt rule in the gutter,
+     which is where the rail's own border already is. */
+  .rail__link--here::before {
+    content: '';
+    position: absolute;
+    left: -1.75rem;
+    top: 0.55rem;
+    width: 0.75rem;
+    height: 1px;
+    background: var(--signal);
+  }
+
+  .rail__foot {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.35rem;
+    align-items: flex-start;
+  }
+
+  .rail__out {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .rail__ext {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--data);
+    font-size: var(--t-xs);
+    color: var(--ink-3);
+    transition: color var(--ease);
+  }
+  .rail__ext:hover { color: var(--signal); }
+
+  .rail__theme {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--data);
+    font-size: var(--t-2xs);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    padding: 0;
+    transition: color var(--ease);
+  }
+  .rail__theme:hover { color: var(--ink); }
+
+  /* ---- Under 54rem the rail becomes a bar across the top ---- */
+  @media (max-width: 54rem) {
+    .rail {
+      position: static;
+      height: auto;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem 1.5rem;
+      padding: 1.1rem 1.5rem;
+      border-right: none;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .rail__name { font-size: 0.9375rem; }
+    .rail__name span { display: inline; }
+    .rail__role { display: none; }
+
+    .rail__nav {
+      flex-direction: row;
+      gap: 1.1rem;
+      margin-right: 0;
+      order: 3;
+      width: 100%;
+      border-top: 1px solid var(--rule);
+      padding-top: 0.65rem;
+    }
+    .rail__link--here::before { left: 0; top: auto; bottom: -0.66rem; width: 100%; }
+
+    .rail__foot { margin-top: 0; flex-direction: row; align-items: center; gap: 1rem; }
+    .rail__out { flex-direction: row; gap: 0.85rem; }
+    .rail__ext span { display: none; }
+    .rail__theme span { display: none; }
+  }
+</style>

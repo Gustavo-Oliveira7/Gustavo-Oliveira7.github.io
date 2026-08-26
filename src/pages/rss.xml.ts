@@ -3,24 +3,24 @@ import { getCollection } from 'astro:content';
 import { site } from '../site.config';
 import type { APIContext } from 'astro';
 
-/** Feed RSS dos artigos — permite que leitores acompanhem sem depender de rede social. */
+/** RSS feed, so readers can follow along without a social network in between. */
 export async function GET(context: APIContext) {
-  const artigos = (await getCollection('artigos', ({ data }) => !data.rascunho)).sort(
-    (a, b) => +b.data.data - +a.data.data,
+  const pieces = (await getCollection('writing', ({ data }) => !data.draft)).sort(
+    (a, b) => +b.data.date - +a.data.date,
   );
 
   return rss({
-    title: `${site.nome} — Artigos`,
-    description: site.descricao,
+    title: `${site.name} — Writing`,
+    description: site.description,
     site: context.site!,
     trailingSlash: false,
-    items: artigos.map((a) => ({
-      title: a.data.titulo,
-      description: a.data.resumo,
-      pubDate: a.data.data,
-      categories: a.data.tags,
-      link: `/artigos/${a.id}`,
+    items: pieces.map((p) => ({
+      title: p.data.title,
+      description: p.data.summary,
+      pubDate: p.data.date,
+      categories: p.data.tags,
+      link: `/writing/${p.id}`,
     })),
-    customData: `<language>pt-br</language>`,
+    customData: `<language>en</language>`,
   });
 }

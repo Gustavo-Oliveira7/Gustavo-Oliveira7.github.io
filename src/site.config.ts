@@ -1,76 +1,79 @@
 /**
  * ============================================================
- *  CONFIGURACAO CENTRAL DO SITE
- *  Este e o unico arquivo que voce precisa editar para mudar
- *  seus dados pessoais, links e o que aparece em destaque.
+ *  SITE CONFIGURATION
+ *  The one file to edit for personal details, links and copy.
+ *  Everything else reads from here.
  * ============================================================
  */
 
 export const site = {
-  /** Nome que aparece no cabecalho e no <title> */
-  nome: 'Gustavo Oliveira',
-  /** Sub-titulo curto, aparece embaixo do nome no hero */
-  cargo: 'Desenvolvedor Backend',
-  /** Uma linha. Usada em meta tags e no compartilhamento em redes sociais. */
-  descricao:
-    'Desenvolvedor backend focado em Java e Go — APIs, sistemas distribuidos e codigo que aguenta producao.',
-  /** Paragrafo do hero na home. Pode usar 2-3 frases. */
-  bio: [
-    'Construo o lado do servidor: APIs, integracoes e servicos que precisam ser corretos antes de serem rapidos.',
-    'Meu foco e Java (Spring) e Go — duas linguagens que resolvem o mesmo problema por caminhos bem diferentes, e escrevo sobre isso aqui.',
-  ],
-  /** Localizacao exibida no rodape e na pagina Sobre. Deixe '' para ocultar. */
-  local: 'Brasil',
-  /** Idioma do documento HTML */
-  lang: 'pt-BR',
+  name: 'Gustavo Oliveira',
+  role: 'Backend Engineer',
+
+  /** Used in <title>, meta description and social previews. */
+  description:
+    'Backend engineer working in Java and Go — APIs, data models and services that hold up under load.',
+
+  /**
+   * The home page headline. It states the thesis the writing argues:
+   * the same contract, expressed two very different ways.
+   */
+  statement: 'Same contract, two different bets.',
+
+  /** The line that sits directly under the Java/Go panels. */
+  annotation: 'Java raises. Go returns. Most of what I write lives in that gap.',
+
+  /** Opening paragraph, below the headline. */
+  intro:
+    'I build backend services in both languages — APIs, data models, and the unglamorous work of keeping a system correct once traffic stops being polite. What I publish here is the reasoning behind those decisions, not the tutorials.',
+
+  location: 'Brazil',
+  lang: 'en',
 } as const;
 
 export const links = {
   github: 'https://github.com/Gustavo-Oliveira7',
-  /** ATENCAO: confirme se esta e a URL real do seu perfil.
-   *  Abra seu LinkedIn e copie a URL da barra de enderecos. */
+  /** CHECK THIS: open your LinkedIn and copy the URL from the address bar. */
   linkedin: 'https://www.linkedin.com/in/gustavo-oliveira7/',
   email: 'gustavo.h.oliveira7531@gmail.com',
 } as const;
 
-/** Usuario do GitHub usado para buscar os repositorios automaticamente. */
+/** GitHub account the project list is pulled from. */
 export const githubUser = 'Gustavo-Oliveira7';
 
 /**
- * Repositorios em DESTAQUE, na ordem em que devem aparecer na home.
- * Use exatamente o nome do repo no GitHub.
- * Os dados (descricao, estrelas, linguagem) sao puxados da API — aqui
- * voce so escolhe QUAIS e pode sobrescrever o texto se quiser.
+ * Featured repositories, in the order they should appear.
+ * Names must match the repository name on GitHub exactly.
+ * Stars, language and dates come from the API — this only decides
+ * WHICH repositories lead, and lets you override the blurb.
  */
-export const projetosDestaque: Array<{
+export const featuredProjects: Array<{
   repo: string;
-  /** Sobrescreve a descricao do GitHub. Deixe de fora para usar a do repo. */
-  descricao?: string;
-  /** Badges extras de tecnologia mostrados no card. */
-  tags?: string[];
+  /** Overrides the GitHub description. Omit to use the repo's own. */
+  blurb?: string;
 }> = [
   {
     repo: 'chess-plataform',
-    descricao: 'Plataforma de xadrez em Java: modelagem de dominio, regras do jogo e validacao de movimentos.',
-    tags: ['Java', 'POO'],
+    blurb:
+      'A chess engine in Java. Most of the work is domain modelling: encoding move legality, board state and check detection without letting the rules leak into the UI.',
   },
   {
     repo: 'guERP',
-    descricao: 'ERP em Java — modulos de cadastro, estoque e persistencia relacional.',
-    tags: ['Java', 'SQL'],
+    blurb:
+      'A small ERP in Java covering registration, inventory and relational persistence — an exercise in keeping a growing schema honest.',
   },
   {
     repo: 'sudokuGame',
-    descricao: 'Engine de Sudoku em Java com geracao de tabuleiro e solver por backtracking.',
-    tags: ['Java', 'Algoritmos'],
+    blurb:
+      'Sudoku generator and solver in Java, built on backtracking with constraint checks that prune the search early.',
   },
 ];
 
 /**
- * Repositorios que NUNCA devem aparecer no site (rascunhos, testes, cursos).
- * A pagina /projetos ja esconde forks automaticamente.
+ * Repositories that should never appear on the site.
+ * Forks and archived repositories are already excluded automatically.
  */
-export const projetosOcultos: string[] = [
+export const hiddenProjects: string[] = [
   'Gustavo-Oliveira7.github.io',
   'testandoClaude',
   'aprendendo-git',
@@ -85,21 +88,16 @@ export const projetosOcultos: string[] = [
   'myPortfolio',
 ];
 
-/**
- * Stack exibida na home e na pagina Sobre.
- * `nivel` e livre — use o texto que fizer sentido para voce.
- */
-export const stack: Array<{ grupo: string; itens: string[] }> = [
-  { grupo: 'Linguagens', itens: ['Java', 'Go', 'TypeScript', 'Python', 'SQL'] },
-  { grupo: 'Backend', itens: ['Spring Boot', 'JPA / Hibernate', 'REST', 'net/http', 'JUnit'] },
-  { grupo: 'Dados', itens: ['PostgreSQL', 'MySQL', 'Redis'] },
-  { grupo: 'Infra', itens: ['Docker', 'Git', 'GitHub Actions', 'Linux', 'AWS'] },
+/** Rendered as a spec table on the home page. */
+export const toolkit: Array<{ field: string; values: string[] }> = [
+  { field: 'Languages', values: ['Java', 'Go', 'TypeScript', 'Python', 'SQL'] },
+  { field: 'Backend', values: ['Spring Boot', 'JPA / Hibernate', 'REST', 'net/http', 'JUnit'] },
+  { field: 'Data', values: ['PostgreSQL', 'MySQL', 'Redis'] },
+  { field: 'Infrastructure', values: ['Docker', 'Git', 'GitHub Actions', 'Linux', 'AWS'] },
 ];
 
-/** Navegacao principal do site. */
-export const navegacao = [
-  { href: '/', rotulo: 'Inicio' },
-  { href: '/projetos', rotulo: 'Projetos' },
-  { href: '/artigos', rotulo: 'Artigos' },
-  { href: '/sobre', rotulo: 'Sobre' },
+export const nav = [
+  { href: '/work', label: 'Work' },
+  { href: '/writing', label: 'Writing' },
+  { href: '/about', label: 'About' },
 ] as const;

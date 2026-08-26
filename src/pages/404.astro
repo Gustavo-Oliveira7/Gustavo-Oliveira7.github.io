@@ -1,39 +1,25 @@
 ---
 import Base from '../layouts/Base.astro';
-import Icone from '../components/Icone.astro';
 ---
 
-<Base titulo="Pagina nao encontrada" descricao="Esta rota nao existe.">
-  <section class="container erro">
-    <p class="erro__codigo mono">404</p>
-    <h1>Esta rota nao existe</h1>
-    <p class="suave erro__texto">
-      O endereco que voce tentou abrir nao corresponde a nenhuma pagina do site. Talvez o link esteja
-      antigo ou tenha um erro de digitacao.
+<Base title="Not found" description="This route does not exist.">
+  <section class="block missing">
+    <p class="tag">404</p>
+    <h1 class="statement missing__title">This route does not exist.</h1>
+    <p class="lede missing__text">
+      The address does not match any page on this site. The link may be out of date, or have a typo
+      in it.
     </p>
-    <div class="linha wrap gap">
-      <a href="/" class="botao botao--primario">
-        Voltar ao inicio <Icone nome="seta" tamanho={16} />
-      </a>
-      <a href="/artigos" class="botao">Ver artigos</a>
-      <a href="/projetos" class="botao">Ver projetos</a>
+    <div class="rowf wrap g-sm">
+      <a href="/" class="frame-btn frame-btn--fill">Home</a>
+      <a href="/writing" class="frame-btn">Writing</a>
+      <a href="/work" class="frame-btn">Work</a>
     </div>
   </section>
 </Base>
 
 <style>
-  .erro {
-    padding-block: 7rem;
-    max-width: 36rem;
-  }
-
-  .erro__codigo {
-    font-size: var(--t-3xl);
-    color: var(--acento);
-    margin-bottom: 0.5rem;
-  }
-
-  .erro__texto {
-    margin-block: 1rem 2rem;
-  }
+  .missing { max-width: 34rem; padding-top: 3rem; }
+  .missing__title { margin: 1rem 0; }
+  .missing__text { margin-bottom: 2rem; }
 </style>

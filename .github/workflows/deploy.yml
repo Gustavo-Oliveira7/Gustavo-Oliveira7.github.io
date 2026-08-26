@@ -1,30 +1,30 @@
 # ============================================================
-#  Publica o site no GitHub Pages.
+#  Publishes the site to GitHub Pages.
 #
-#  Roda em tres situacoes:
-#   1. push na main       -> voce mexeu no site ou publicou um artigo
-#   2. a cada 6 horas     -> re-busca os dados do GitHub e republica,
-#                            e assim repositorios novos aparecem sozinhos
-#   3. manualmente        -> aba Actions > "Publicar site" > Run workflow
-#                            (ou pelo terminal: gh workflow run deploy.yml)
+#  Runs in three situations:
+#   1. push to main    -> you changed the site or published a piece
+#   2. every 6 hours   -> re-fetches GitHub data and republishes, so new
+#                         repositories appear on their own
+#   3. manually        -> Actions tab > "Publish site" > Run workflow
+#                         (or from a terminal: gh workflow run deploy.yml)
 # ============================================================
-name: Publicar site
+name: Publish site
 
 on:
   push:
     branches: [main]
   schedule:
-    # minuto 0, a cada 6 horas (UTC). Mude para '0 * * * *' se quiser de hora em hora.
+    # Minute 0, every 6 hours (UTC). Use '0 * * * *' for hourly.
     - cron: '0 */6 * * *'
   workflow_dispatch:
 
-# Permissoes minimas necessarias para publicar no Pages
+# Least privilege needed to publish to Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Nunca deixa dois deploys rodarem ao mesmo tempo
+# Never let two deploys run at the same time
 concurrency:
   group: pages
   cancel-in-progress: false
@@ -34,26 +34,26 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - name: Baixar o repositorio
+      - name: Check out the repository
         uses: actions/checkout@v7
 
-      - name: Preparar o Node
+      - name: Set up Node
         uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: npm
 
-      - name: Instalar dependencias
+      - name: Install dependencies
         run: npm ci
 
-      - name: Gerar o site
+      - name: Build the site
         run: npm run build
         env:
-          # Eleva o limite da API do GitHub de 60 para 5000 requisicoes/hora
-          # durante o build. E o token automatico do Actions, voce nao precisa criar nada.
+          # Lifts the GitHub API limit from 60 to 5000 requests/hour during the
+          # build. This is the Actions-provided token — nothing to create.
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Enviar o resultado para o Pages
+      - name: Upload the build for Pages
         uses: actions/upload-pages-artifact@v5
         with:
           path: ./dist
@@ -64,8 +64,8 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.publicar.outputs.page_url }}
+      url: ${{ steps.deploy.outputs.page_url }}
     steps:
-      - name: Publicar no GitHub Pages
-        id: publicar
+      - name: Deploy to GitHub Pages
+        id: deploy
         uses: actions/deploy-pages@v5

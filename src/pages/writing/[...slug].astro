@@ -1,0 +1,230 @@
+---
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import { longDate, readingTime } from '../../lib/text';
+import { links, site } from '../../site.config';
+import { getCollection, render } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (async () => {
+  const pieces = await getCollection('writing', ({ data }) => !data.draft);
+  const ordered = pieces.sort((a, b) => +b.data.date - +a.data.date);
+
+  return ordered.map((piece, i) => ({
+    params: { slug: piece.id },
+    props: {
+      piece,
+      older: ordered[i + 1] ?? null,
+      newer: ordered[i - 1] ?? null,
+    },
+  }));
+}) satisfies GetStaticPaths;
+
+const { piece, older, newer } = Astro.props;
+const { Content } = await render(piece);
+const minutes = readingTime(piece.body ?? '');
+
+const shareUrl = new URL(Astro.url.pathname, Astro.site).toString();
+const linkedinShare = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
+---
+
+<Base
+  title={piece.data.title}
+  description={piece.data.summary}
+  type="article"
+  publishedAt={piece.data.date}
+>
+  <article class="block piece">
+    <a href="/writing" class="back act">
+      <span class="back__arrow"><Icon name="arrow" size={13} /></span> Writing
+    </a>
+
+    <header class="piece__head">
+      <p class="datum piece__meta">
+        <time datetime={piece.data.date.toISOString()}>{longDate(piece.data.date)}</time>
+        <span class="piece__slash">/</span>
+        <span>{minutes} min read</span>
+      </p>
+
+      <h1 class="piece__title">{piece.data.title}</h1>
+      <p class="lede piece__summary">{piece.data.summary}</p>
+
+      {
+        piece.data.tags.length > 0 && (
+          <p class="dotted piece__tags">
+            {piece.data.tags.map((t) => (
+              <span>{t}</span>
+            ))}
+          </p>
+        )
+      }
+    </header>
+
+    <div class="prose">
+      <Content />
+    </div>
+
+    <footer class="piece__foot">
+      <div class="foot__share">
+        <p class="tag">Share</p>
+        <div class="rowf wrap g-sm foot__buttons">
+          <a href={linkedinShare} target="_blank" rel="noopener" class="frame-btn">
+            <Icon name="linkedin" size={13} /> LinkedIn
+          </a>
+          <button type="button" class="frame-btn" id="copy-link">
+            <span id="copy-label">Copy link</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="foot__author">
+        <p class="tag">Written by</p>
+        <p class="foot__name">{site.name}</p>
+        <p class="datum">{site.role}</p>
+        <div class="rowf wrap g-sm foot__links">
+          <a href={links.github} target="_blank" rel="noopener" class="act">
+            <Icon name="github" size={13} /> GitHub
+          </a>
+          <a href={links.linkedin} target="_blank" rel="noopener" class="act">
+            <Icon name="linkedin" size={12} /> LinkedIn
+          </a>
+        </div>
+      </div>
+    </footer>
+
+    {
+      (older || newer) && (
+        <nav class="near" aria-label="Nearby pieces">
+          {newer ? (
+            <a href={`/writing/${newer.id}`} class="near__item">
+              <span class="tag">Newer</span>
+              <span class="near__title">{newer.data.title}</span>
+            </a>
+          ) : (
+            <span />
+          )}
+          {older && (
+            <a href={`/writing/${older.id}`} class="near__item near__item--end">
+              <span class="tag">Older</span>
+              <span class="near__title">{older.data.title}</span>
+            </a>
+          )}
+        </nav>
+      )
+    }
+  </article>
+</Base>
+
+<script>
+  document.getElementById('copy-link')?.addEventListener('click', async () => {
+    const label = document.getElementById('copy-label');
+    if (!label) return;
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      label.textContent = 'Copied';
+      setTimeout(() => (label.textContent = 'Copy link'), 2000);
+    } catch {
+      label.textContent = 'Copy failed';
+    }
+  });
+</script>
+
+<style>
+  .piece { max-width: 44rem; }
+
+  .back {
+    display: inline-flex;
+    margin-bottom: 2.5rem;
+  }
+  .back__arrow {
+    transform: rotate(180deg);
+    display: inline-flex;
+    transition: transform var(--ease);
+  }
+  .back:hover .back__arrow { transform: rotate(180deg) translateX(3px); }
+
+  .piece__head {
+    padding-bottom: 2.25rem;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 2.25rem;
+  }
+
+  .piece__meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .piece__slash { color: var(--rule-2); }
+
+  .piece__title {
+    font-family: var(--read);
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    font-weight: 500;
+    line-height: 1.14;
+    letter-spacing: -0.022em;
+    margin-bottom: 1rem;
+  }
+
+  .piece__summary { color: var(--ink-2); }
+
+  .piece__tags { margin-top: 1.25rem; }
+
+  .piece__foot {
+    margin-top: 3.5rem;
+    padding-top: 1.75rem;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    gap: 2.5rem;
+    flex-wrap: wrap;
+  }
+
+  .foot__buttons { margin-top: 0.7rem; }
+
+  .foot__name {
+    font-family: var(--data);
+    font-size: var(--t-sm);
+    font-weight: 500;
+    color: var(--ink);
+    margin-top: 0.7rem;
+  }
+
+  .foot__links { margin-top: 0.7rem; }
+
+  .near {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    margin-top: 2.5rem;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+  }
+
+  .near__item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    padding: 1.1rem 1.2rem;
+    background: var(--ground);
+    transition: background var(--ease);
+  }
+  .near__item:hover { background: var(--ground-raised); }
+  .near__item--end { text-align: right; }
+
+  .near__title {
+    font-family: var(--read);
+    font-size: var(--t-sm);
+    font-weight: 500;
+    line-height: 1.35;
+    color: var(--ink);
+    transition: color var(--ease);
+  }
+  .near__item:hover .near__title { color: var(--signal); }
+
+  @media (max-width: 44rem) {
+    .near { grid-template-columns: 1fr; }
+    .near__item--end { text-align: left; }
+  }
+</style>

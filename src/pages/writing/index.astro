@@ -1,0 +1,87 @@
+---
+import Base from '../../layouts/Base.astro';
+import WritingEntry from '../../components/WritingEntry.astro';
+import Icon from '../../components/Icon.astro';
+import { readingTime } from '../../lib/text';
+import { getCollection } from 'astro:content';
+
+const pieces = (await getCollection('writing', ({ data }) => !data.draft)).sort(
+  (a, b) => +b.data.date - +a.data.date,
+);
+
+// Group by year. Dates are a real sequence, so this ordering carries
+// information rather than decorating the list.
+const byYear = new Map<number, typeof pieces>();
+for (const p of pieces) {
+  const y = p.data.date.getFullYear();
+  const list = byYear.get(y);
+  if (list) list.push(p);
+  else byYear.set(y, [p]);
+}
+const years = [...byYear.entries()].sort((a, b) => b[0] - a[0]);
+---
+
+<Base
+  title="Writing"
+  description="Pieces on backend engineering, Java, Go, concurrency and the trade-offs behind them."
+>
+  <section class="block">
+    <h1 class="statement page__title">Writing</h1>
+    <p class="lede page__lede">
+      Notes from building and maintaining backend systems. Mostly about why a decision was made
+      rather than how to type it.
+    </p>
+    <a href="/rss.xml" class="act page__act">
+      <Icon name="rss" size={13} /> Subscribe by RSS
+    </a>
+  </section>
+
+  {
+    years.length > 0 ? (
+      years.map(([year, list]) => (
+        <section class="block">
+          <div class="rowf between baseline g-sm year__head">
+            <h2 class="h-section">{year}</h2>
+            <span class="datum">
+              {list.length} {list.length === 1 ? 'piece' : 'pieces'}
+            </span>
+          </div>
+          <div class="entries">
+            {list.map((p) => (
+              <WritingEntry
+                slug={p.id}
+                title={p.data.title}
+                summary={p.data.summary}
+                date={p.data.date}
+                tags={p.data.tags}
+                minutes={readingTime(p.body ?? '')}
+              />
+            ))}
+          </div>
+        </section>
+      ))
+    ) : (
+      <section class="block">
+        <p class="body-text">
+          Nothing published yet. Add a <code class="inline">.md</code> file to
+          <code class="inline">src/content/writing/</code> and push.
+        </p>
+      </section>
+    )
+  }
+</Base>
+
+<style>
+  .page__title { margin-bottom: 1.25rem; }
+  .page__lede { margin-bottom: 1.25rem; }
+  .page__act { margin-top: 0.25rem; }
+  .year__head { margin-bottom: 1.25rem; }
+
+  .inline {
+    font-family: var(--data);
+    font-size: 0.85em;
+    background: var(--ground-sunken);
+    border-radius: var(--r);
+    padding: 0.1em 0.35em;
+  }
+</style>

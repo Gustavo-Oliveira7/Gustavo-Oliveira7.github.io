@@ -1,0 +1,173 @@
+---
+import Base from '../layouts/Base.astro';
+import ProjectEntry from '../components/ProjectEntry.astro';
+import Icon from '../components/Icon.astro';
+import { links, githubUser, featuredProjects } from '../site.config';
+import { fetchRepos, groupByLanguage } from '../lib/github';
+import { languageColour } from '../lib/text';
+
+const repos = await fetchRepos();
+const groups = groupByLanguage(repos);
+
+// Featured repositories keep their hand-written blurb here too.
+const blurbs = new Map(
+  featuredProjects.filter((f) => f.blurb).map((f) => [f.repo.toLowerCase(), f.blurb!]),
+);
+---
+
+<Base
+  title="Work"
+  description="Public repositories, pulled from the GitHub API and grouped by language."
+>
+  <section class="block">
+    <h1 class="statement page__title">Work</h1>
+    <p class="lede page__lede">
+      Everything public, grouped by language and ordered by most recent push. This list comes
+      straight from the GitHub API — a new repository shows up here on its own. Forks and archived
+      repositories are left out.
+    </p>
+    <a href={links.github} target="_blank" rel="noopener" class="act page__act">
+      <Icon name="github" size={14} /> Full profile on GitHub
+    </a>
+  </section>
+
+  {
+    groups.length > 0 ? (
+      groups.map((group) => (
+        <section class="block">
+          <div class="rowf between baseline g-sm group__head">
+            <h2 class="rowf g-xs group__name">
+              <span class="swatch" style={`background:${languageColour(group.language)}`} />
+              <span class="h-section">{group.language}</span>
+            </h2>
+            <span class="datum">
+              {group.repos.length} {group.repos.length === 1 ? 'repository' : 'repositories'}
+            </span>
+          </div>
+
+          <div class="entries">
+            {group.repos.map((repo) => (
+              <ProjectEntry repo={repo} blurb={blurbs.get(repo.name.toLowerCase())} showLanguage={false} />
+            ))}
+          </div>
+        </section>
+      ))
+    ) : (
+      <section class="block">
+        <p class="body-text">
+          The GitHub API did not respond while this page was generated — usually a rate limit. The
+          next scheduled build picks it up automatically.
+        </p>
+        <a href={links.github} class="act page__act" target="_blank" rel="noopener">
+          See the repositories on GitHub <span class="act__arrow"><Icon name="arrow" size={13} /></span>
+        </a>
+      </section>
+    )
+  }
+
+  <p class="sync datum" id="sync" hidden>
+    <span class="sync__mark"></span>
+    <span id="sync-text"></span>
+  </p>
+</Base>
+
+<script is:inline define:vars={{ user: githubUser }}>
+  // The HTML already carries the data from the last build. This asks GitHub
+  // again from the visitor's browser and corrects any counts that moved since.
+  // On failure nothing happens and the build-time values stand.
+  const cards = document.querySelectorAll('[data-repo]');
+
+  const fmt = new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+
+  async function sync() {
+    const res = await fetch(
+      'https://api.github.com/users/' + user + '/repos?per_page=100&sort=updated&type=owner',
+      { headers: { Accept: 'application/vnd.github+json' } },
+    );
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+
+    const byName = new Map(data.map((r) => [r.name.toLowerCase(), r]));
+    let changed = 0;
+
+    cards.forEach((card) => {
+      const live = byName.get(card.dataset.repo.toLowerCase());
+      if (!live) return;
+
+      for (const [field, value] of [
+        ['stars', live.stargazers_count],
+        ['forks', live.forks_count],
+      ]) {
+        const slot = card.querySelector('[data-value="' + field + '"]');
+        const wrap = card.querySelector('[data-field="' + field + '"]');
+        if (!slot || !wrap) continue;
+        if (slot.textContent.trim() !== String(value)) changed++;
+        slot.textContent = String(value);
+        wrap.hidden = value === 0;
+      }
+
+      const when = card.querySelector('[data-value="updated"]');
+      const iso = live.pushed_at || live.updated_at;
+      if (when && iso) {
+        const text = fmt.format(new Date(iso));
+        if (when.textContent.trim() !== text) changed++;
+        when.textContent = text;
+      }
+    });
+
+    const known = new Set([...cards].map((c) => c.dataset.repo.toLowerCase()));
+    const fresh = data.filter((r) => !r.fork && !r.archived && !known.has(r.name.toLowerCase())).length;
+
+    return { changed, fresh };
+  }
+
+  const box = document.getElementById('sync');
+  const text = document.getElementById('sync-text');
+
+  sync()
+    .then(({ changed, fresh }) => {
+      if (!box || !text) return;
+      if (fresh > 0) {
+        text.textContent =
+          fresh + (fresh === 1 ? ' new repository' : ' new repositories') +
+          ' on GitHub — they appear here after the next scheduled build.';
+      } else if (changed > 0) {
+        text.textContent = 'Counts refreshed from GitHub just now.';
+      } else {
+        text.textContent = 'In sync with GitHub.';
+      }
+      box.hidden = false;
+    })
+    .catch(() => {
+      /* intentionally silent: the visitor already has the build-time data */
+    });
+</script>
+
+<style>
+  .page__title { margin-bottom: 1.25rem; }
+  .page__lede { margin-bottom: 1.25rem; }
+  .page__act { margin-top: 0.25rem; }
+
+  .group__head { margin-bottom: 1.25rem; }
+  .group__name { margin: 0; }
+
+  .sync {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-bottom: 2.5rem;
+  }
+  .sync[hidden] { display: none; }
+
+  .sync__mark {
+    width: 6px;
+    height: 6px;
+    border-radius: 1px;
+    background: var(--signal);
+    flex-shrink: 0;
+  }
+</style>

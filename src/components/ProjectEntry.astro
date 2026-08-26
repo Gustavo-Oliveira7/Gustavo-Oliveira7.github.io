@@ -1,0 +1,112 @@
+---
+import type { Repo } from '../lib/github';
+import { formatDate } from '../lib/github';
+import { languageColour } from '../lib/text';
+import Icon from './Icon.astro';
+
+interface Props {
+  repo: Repo;
+  /** Overrides the description that came from GitHub. */
+  blurb?: string;
+  /** Off on /work, where the group heading already names the language. */
+  showLanguage?: boolean;
+}
+
+const { repo, blurb, showLanguage = true } = Astro.props;
+const text = blurb ?? repo.description ?? 'No description on the repository yet.';
+---
+
+{/* data-* attributes let /work refresh stars and dates in the browser. */}
+<a
+  href={repo.url}
+  target="_blank"
+  rel="noopener"
+  class="entry project"
+  data-repo={repo.name}
+  data-language={repo.language ?? 'Other'}
+>
+  <span class="project__line">
+    <span class="project__name">{repo.name}</span>
+    <span class="project__go"><Icon name="external" size={13} /></span>
+  </span>
+
+  <span class="project__text body-text">{text}</span>
+
+  <span class="project__meta">
+    <span class="project__fact" data-field="language" hidden={!repo.language || !showLanguage}>
+      <span class="swatch" style={`background:${languageColour(repo.language)}`}></span>
+      <span data-value="language">{repo.language}</span>
+    </span>
+
+    <span class="project__fact" data-field="stars" hidden={repo.stars === 0}>
+      <span data-value="stars">{repo.stars}</span> stars
+    </span>
+
+    <span class="project__fact" data-field="forks" hidden={repo.forks === 0}>
+      <span data-value="forks">{repo.forks}</span> forks
+    </span>
+
+    <span class="project__fact project__when">
+      pushed <span data-value="updated">{formatDate(repo.updatedAt)}</span>
+    </span>
+  </span>
+</a>
+
+<style>
+  .project { text-decoration: none; }
+
+  .project__line {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    margin-bottom: 0.45rem;
+  }
+
+  .project__name {
+    font-family: var(--data);
+    font-size: var(--t-base);
+    font-weight: 500;
+    color: var(--ink);
+    letter-spacing: -0.015em;
+    overflow-wrap: anywhere;
+    transition: color var(--ease);
+  }
+  .project:hover .project__name { color: var(--signal); }
+
+  .project__go {
+    color: var(--rule-2);
+    opacity: 0;
+    transition: opacity var(--ease), color var(--ease);
+  }
+  .project:hover .project__go { opacity: 1; color: var(--signal); }
+
+  .project__text {
+    display: block;
+    font-size: var(--t-sm);
+    line-height: 1.6;
+    margin-bottom: 0.7rem;
+  }
+
+  .project__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem 1.1rem;
+    font-family: var(--data);
+    font-size: var(--t-xs);
+    color: var(--ink-3);
+  }
+
+  .project__fact {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .project__fact[hidden] { display: none; }
+
+  .project__when { margin-left: auto; }
+
+  @media (max-width: 44rem) {
+    .project__when { margin-left: 0; }
+  }
+</style>

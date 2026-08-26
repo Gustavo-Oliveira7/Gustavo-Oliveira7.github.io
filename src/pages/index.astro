@@ -1,249 +1,196 @@
 ---
 import Base from '../layouts/Base.astro';
-import CartaoProjeto from '../components/CartaoProjeto.astro';
-import CartaoArtigo from '../components/CartaoArtigo.astro';
-import Icone from '../components/Icone.astro';
-import { site, links, stack, projetosDestaque } from '../site.config';
-import { buscarRepositorios, buscarPerfil } from '../lib/github';
-import { tempoLeitura } from '../lib/texto';
+import SplitSignature from '../components/SplitSignature.astro';
+import ProjectEntry from '../components/ProjectEntry.astro';
+import WritingEntry from '../components/WritingEntry.astro';
+import Icon from '../components/Icon.astro';
+import { site, links, toolkit, featuredProjects } from '../site.config';
+import { fetchRepos } from '../lib/github';
+import { readingTime } from '../lib/text';
 import { getCollection } from 'astro:content';
 
-// Dados do GitHub buscados no build. Ver src/lib/github.ts.
-const repos = await buscarRepositorios();
-const perfil = await buscarPerfil();
+const repos = await fetchRepos();
 
-// Casa a lista de destaques do site.config com os dados reais do GitHub.
-const destaques = projetosDestaque
-  .map((d) => {
-    const repo = repos.find((r) => r.nome.toLowerCase() === d.repo.toLowerCase());
-    return repo ? { repo, descricao: d.descricao, tags: d.tags } : null;
+const featured = featuredProjects
+  .map((f) => {
+    const repo = repos.find((r) => r.name.toLowerCase() === f.repo.toLowerCase());
+    return repo ? { repo, blurb: f.blurb } : null;
   })
   .filter((x) => x !== null);
 
-// Se a API do GitHub estiver fora, cai para os repos mais recentes.
-const projetos = destaques.length > 0 ? destaques : repos.slice(0, 3).map((repo) => ({ repo, descricao: undefined, tags: undefined }));
+// If the API was unreachable at build time, lead with the most recent repos.
+const shown = featured.length > 0 ? featured : repos.slice(0, 3).map((repo) => ({ repo, blurb: undefined }));
 
-const artigos = (await getCollection('artigos', ({ data }) => !data.rascunho))
-  .sort((a, b) => +b.data.data - +a.data.data)
+const pieces = (await getCollection('writing', ({ data }) => !data.draft))
+  .sort((a, b) => +b.data.date - +a.data.date)
   .slice(0, 3);
 ---
 
 <Base>
-  <!-- ============ HERO ============ -->
-  <section class="container hero">
-    <p class="hero__rotulo mono">{site.cargo} · Java &amp; Go</p>
-    <h1 class="hero__titulo">{site.nome}</h1>
+  <!-- ============================ HERO ============================ -->
+  <section class="block hero">
+    <p class="tag">
+      {site.role} <span class="hero__sep">/</span> Java and Go <span class="hero__sep">/</span>
+      {site.location}
+    </p>
 
-    <div class="hero__bio">
-      {site.bio.map((p) => <p>{p}</p>)}
+    <h1 class="statement hero__statement">{site.statement}</h1>
+
+    <div class="hero__signature">
+      <SplitSignature />
     </div>
 
-    <div class="hero__acoes">
-      <a href="/projetos" class="botao botao--primario">
-        Ver projetos <Icone nome="seta" tamanho={16} />
-      </a>
-      <a href="/artigos" class="botao">Ler artigos</a>
-      <a href={links.github} target="_blank" rel="noopener" class="botao">
-        <Icone nome="github" tamanho={16} /> GitHub
-      </a>
-      <a href={links.linkedin} target="_blank" rel="noopener" class="botao">
-        <Icone nome="linkedin" tamanho={15} /> LinkedIn
-      </a>
-    </div>
+    <p class="hero__annotation">{site.annotation}</p>
 
-    {
-      perfil && (
-        <p class="hero__stats mono fraco">
-          {perfil.reposPublicos} repositorios publicos · {perfil.seguidores} seguidores no GitHub
-        </p>
-      )
-    }
+    <p class="lede hero__intro">{site.intro}</p>
+
+    <div class="rowf wrap g-sm hero__acts">
+      <a href="/writing" class="frame-btn frame-btn--fill">Read the writing</a>
+      <a href="/work" class="frame-btn">Browse the code</a>
+    </div>
   </section>
 
-  <!-- ============ STACK ============ -->
-  <section class="container secao--compacta">
-    <div class="stack">
+  <!-- ============================ TOOLKIT ============================ -->
+  <section class="block">
+    <h2 class="h-section spec__heading">toolkit</h2>
+    <dl class="spec">
       {
-        stack.map((grupo) => (
-          <div class="stack__grupo">
-            <p class="stack__titulo mono">{grupo.grupo}</p>
-            <div class="linha wrap gap-sm">
-              {grupo.itens.map((i) => (
-                <span class="tag">{i}</span>
+        toolkit.map((group) => (
+          <div class="spec__row">
+            <dt class="tag">{group.field}</dt>
+            <dd class="dotted spec__values">
+              {group.values.map((v) => (
+                <span>{v}</span>
               ))}
-            </div>
+            </dd>
           </div>
         ))
       }
-    </div>
+    </dl>
   </section>
 
-  <!-- ============ PROJETOS ============ -->
-  <section class="container secao">
-    <div class="cabecalho-secao">
-      <div>
-        <p class="rotulo-secao">Projetos</p>
-        <h2>Em destaque</h2>
-      </div>
-      <a href="/projetos" class="link-acento">
-        Todos os projetos <Icone nome="seta" tamanho={16} />
+  <!-- ============================ WORK ============================ -->
+  <section class="block">
+    <div class="rowf between baseline g-sm head">
+      <h2 class="h-section">selected work</h2>
+      <a href="/work" class="act">
+        All repositories <span class="act__arrow"><Icon name="arrow" size={13} /></span>
       </a>
     </div>
 
     {
-      projetos.length > 0 ? (
-        <div class="grade">
-          {projetos.map((p) => (
-            <CartaoProjeto repo={p.repo} descricao={p.descricao} tags={p.tags} />
+      shown.length > 0 ? (
+        <div class="entries">
+          {shown.map((p) => (
+            <ProjectEntry repo={p.repo} blurb={p.blurb} />
           ))}
         </div>
       ) : (
-        <p class="suave">
-          Nao foi possivel carregar os repositorios agora.{' '}
-          <a href={links.github} class="link-acento" target="_blank" rel="noopener">
-            Ver direto no GitHub
+        <p class="body-text">
+          The repository list could not be loaded during the last build.{' '}
+          <a href={links.github} class="act" target="_blank" rel="noopener">
+            See them on GitHub
           </a>
         </p>
       )
     }
   </section>
 
-  <!-- ============ ARTIGOS ============ -->
-  <section class="container secao">
-    <div class="cabecalho-secao">
-      <div>
-        <p class="rotulo-secao">Escrita</p>
-        <h2>Ultimos artigos</h2>
-      </div>
-      <a href="/artigos" class="link-acento">
-        Todos os artigos <Icone nome="seta" tamanho={16} />
+  <!-- ============================ WRITING ============================ -->
+  <section class="block">
+    <div class="rowf between baseline g-sm head">
+      <h2 class="h-section">writing</h2>
+      <a href="/writing" class="act">
+        All pieces <span class="act__arrow"><Icon name="arrow" size={13} /></span>
       </a>
     </div>
 
     {
-      artigos.length > 0 ? (
-        <div class="lista-artigos">
-          {artigos.map((a) => (
-            <CartaoArtigo
-              slug={a.id}
-              titulo={a.data.titulo}
-              resumo={a.data.resumo}
-              data={a.data.data}
-              tags={a.data.tags}
-              minutos={tempoLeitura(a.body ?? '')}
-              compacto
+      pieces.length > 0 ? (
+        <div class="entries">
+          {pieces.map((p) => (
+            <WritingEntry
+              slug={p.id}
+              title={p.data.title}
+              summary={p.data.summary}
+              date={p.data.date}
+              tags={p.data.tags}
+              minutes={readingTime(p.body ?? '')}
             />
           ))}
         </div>
       ) : (
-        <p class="suave">Nenhum artigo publicado ainda.</p>
+        <p class="body-text">Nothing published yet.</p>
       )
     }
   </section>
 
-  <!-- ============ CONTATO ============ -->
-  <section class="container secao">
-    <div class="contato">
-      <div>
-        <p class="rotulo-secao">Contato</p>
-        <h2>Vamos conversar</h2>
-        <p class="suave contato__texto">
-          Aberto a trocar ideia sobre backend, arquitetura ou oportunidades. A resposta mais rapida
-          costuma vir pelo LinkedIn.
-        </p>
-      </div>
-      <div class="linha wrap gap">
-        <a href={`mailto:${links.email}`} class="botao botao--primario">
-          <Icone nome="email" tamanho={16} /> {links.email}
-        </a>
-        <a href={links.linkedin} target="_blank" rel="noopener" class="botao">
-          <Icone nome="linkedin" tamanho={15} /> LinkedIn
-        </a>
-      </div>
+  <!-- ============================ CONTACT ============================ -->
+  <section class="block">
+    <h2 class="h-section head">get in touch</h2>
+    <p class="lede contact__text">
+      Open to talking about backend work, architecture, or a role. Email lands fastest.
+    </p>
+    <div class="rowf wrap g-md contact__links">
+      <a href={`mailto:${links.email}`} class="act">
+        <Icon name="mail" size={14} />
+        {links.email}
+      </a>
+      <a href={links.linkedin} target="_blank" rel="noopener" class="act">
+        <Icon name="linkedin" size={13} /> LinkedIn
+      </a>
     </div>
   </section>
 </Base>
 
 <style>
-  .hero {
-    padding-block: 5.5rem 3rem;
-    max-width: 52rem;
+  .hero { padding-top: 0.5rem; }
+
+  .hero__sep {
+    color: var(--rule-2);
+    margin-inline: 0.15rem;
   }
 
-  .hero__rotulo {
-    color: var(--acento);
-    font-size: var(--t-sm);
-    letter-spacing: 0.04em;
-    margin-bottom: 1rem;
-  }
+  .hero__statement { margin: 1.1rem 0 2rem; }
 
-  .hero__titulo {
-    margin-bottom: 1.5rem;
-    background: linear-gradient(160deg, var(--texto) 30%, var(--texto-suave));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
+  .hero__signature { max-width: 50rem; }
 
-  .hero__bio {
-    display: flex;
-    flex-direction: column;
-    gap: 0.9rem;
-    font-size: var(--t-lg);
-    color: var(--texto-suave);
-    max-width: 42rem;
-  }
-
-  .hero__acoes {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.7rem;
-    margin-top: 2rem;
-  }
-
-  .hero__stats { margin-top: 1.5rem; }
-
-  .stack {
-    display: grid;
-    gap: 1.5rem;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
-    padding: 1.75rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--raio);
-  }
-
-  .stack__titulo {
+  .hero__annotation {
+    font-family: var(--data);
     font-size: var(--t-xs);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--acento);
-    margin-bottom: 0.7rem;
+    color: var(--ink-3);
+    margin-top: 0.9rem;
+    max-width: 50rem;
   }
 
-  .lista-artigos {
-    border-top: 1px solid var(--border);
+  .hero__intro { margin-top: 2rem; }
+
+  .hero__acts { margin-top: 1.75rem; }
+
+  /* ---- Spec table ---- */
+  .spec__heading { margin-bottom: 1.5rem; }
+
+  .spec { border-top: 1px solid var(--rule); }
+
+  .spec__row {
+    display: grid;
+    grid-template-columns: 11rem minmax(0, 1fr);
+    gap: 1rem;
+    padding-block: 0.85rem;
+    border-bottom: 1px solid var(--rule);
+    align-items: baseline;
   }
 
-  .contato {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    gap: 2.5rem;
-    flex-wrap: wrap;
-    padding: 2.5rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--raio);
-  }
+  .spec__values { color: var(--ink-2); }
 
-  .contato__texto {
-    max-width: 34rem;
-    margin-top: 0.75rem;
-  }
+  .head { margin-bottom: 1.5rem; }
 
-  @media (max-width: 40rem) {
-    .hero { padding-block: 3.5rem 2rem; }
-    .contato { padding: 1.75rem; }
+  .contact__text { margin-bottom: 1.25rem; }
+
+  @media (max-width: 44rem) {
+    .spec__row {
+      grid-template-columns: 1fr;
+      gap: 0.35rem;
+    }
   }
 </style>

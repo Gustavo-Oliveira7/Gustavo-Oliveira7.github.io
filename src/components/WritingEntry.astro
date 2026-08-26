@@ -1,0 +1,69 @@
+---
+import { shortDate } from '../lib/text';
+
+interface Props {
+  slug: string;
+  title: string;
+  summary: string;
+  date: Date;
+  tags: string[];
+  minutes: number;
+}
+
+const { slug, title, summary, date, tags, minutes } = Astro.props;
+---
+
+<a href={`/writing/${slug}`} class="entry piece">
+  <span class="piece__meta datum">
+    <time datetime={date.toISOString()}>{shortDate(date)}</time>
+    <span class="piece__dot">/</span>
+    <span>{minutes} min</span>
+  </span>
+
+  <span class="piece__title">{title}</span>
+  <span class="piece__summary body-text">{summary}</span>
+
+  {
+    tags.length > 0 && (
+      <span class="dotted piece__tags">
+        {tags.map((t) => (
+          <span>{t}</span>
+        ))}
+      </span>
+    )
+  }
+</a>
+
+<style>
+  .piece { text-decoration: none; }
+
+  .piece__meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .piece__dot { color: var(--rule-2); }
+
+  .piece__title {
+    display: block;
+    font-family: var(--read);
+    font-size: var(--t-xl);
+    font-weight: 500;
+    line-height: 1.28;
+    letter-spacing: -0.012em;
+    color: var(--ink);
+    max-width: 32ch;
+    margin-bottom: 0.5rem;
+    transition: color var(--ease);
+  }
+  .piece:hover .piece__title { color: var(--signal); }
+
+  .piece__summary {
+    display: block;
+    font-size: var(--t-sm);
+    line-height: 1.62;
+  }
+
+  .piece__tags { margin-top: 0.7rem; }
+</style>

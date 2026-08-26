@@ -1,0 +1,100 @@
+---
+/**
+ * The signature element: one operation, written the way each language
+ * insists on writing it. Java raises, Go returns. The whole site's point
+ * of view sits in the gap between these two panels, so this is the only
+ * place the design raises its voice.
+ *
+ * The snippets are built as HTML strings because braces in an Astro
+ * template would be parsed as expressions. Highlighting is deliberately
+ * restrained — keyword, identifier, string. A full syntax rainbow would
+ * fight the palette.
+ */
+
+const k = (s: string) => `<span class="k">${s}</span>`;
+const f = (s: string) => `<span class="f">${s}</span>`;
+const s = (t: string) => `<span class="s">${t}</span>`;
+
+const java = [
+  `${k('public')} Order ${f('findById')}(${k('long')} id) {`,
+  `  ${k('return')} repo.findById(id)`,
+  `    .orElseThrow(() -&gt;`,
+  `      ${k('new')} ${f('OrderNotFound')}(id));`,
+  `}`,
+].join('\n');
+
+const go = [
+  `${k('func')} (r *Repo) ${f('Find')}(id ${k('int64')}) (*Order, ${k('error')}) {`,
+  `  o, err := r.store.Get(id)`,
+  `  ${k('if')} err != ${k('nil')} {`,
+  `    ${k('return')} ${k('nil')}, fmt.Errorf(${s('"find: %w"')}, err)`,
+  `  }`,
+  `  ${k('return')} o, ${k('nil')}`,
+  `}`,
+].join('\n');
+---
+
+<div class="split">
+  <div class="panel">
+    <p class="panel__head">
+      <span class="swatch" style="background: var(--java)"></span>
+      <span class="tag">Java</span>
+      <span class="panel__note">raises</span>
+    </p>
+    <pre class="code" set:html={java}></pre>
+  </div>
+
+  <div class="panel">
+    <p class="panel__head">
+      <span class="swatch" style="background: var(--go)"></span>
+      <span class="tag">Go</span>
+      <span class="panel__note">returns</span>
+    </p>
+    <pre class="code" set:html={go}></pre>
+  </div>
+</div>
+
+<style>
+  .split {
+    max-width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    background: var(--ground-raised);
+  }
+
+  .panel {
+    padding: 1.05rem 1.25rem 1.35rem;
+    min-width: 0;
+  }
+  .panel + .panel { border-left: 1px solid var(--rule); }
+
+  .panel__head {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-bottom: 0.85rem;
+    margin-bottom: 0.95rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .panel__note {
+    margin-left: auto;
+    font-family: var(--data);
+    font-size: var(--t-2xs);
+    color: var(--ink-3);
+  }
+
+  /* The Go panel runs longer than the Java one at the same size. That
+     asymmetry is the argument — do not force the two to match. */
+  .panel .code { font-size: 0.7rem; }
+
+  @media (max-width: 60rem) {
+    .split { grid-template-columns: 1fr; }
+    .panel + .panel {
+      border-left: none;
+      border-top: 1px solid var(--rule);
+    }
+  }
+</style>
