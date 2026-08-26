@@ -1,0 +1,170 @@
+---
+import Base from '../../layouts/Base.astro';
+import CartaoArtigo from '../../components/CartaoArtigo.astro';
+import Icone from '../../components/Icone.astro';
+import { tempoLeitura } from '../../lib/texto';
+import { getCollection } from 'astro:content';
+
+const artigos = (await getCollection('artigos', ({ data }) => !data.rascunho)).sort(
+  (a, b) => +b.data.data - +a.data.data,
+);
+
+// Tags unicas, ordenadas por frequencia.
+const contagem = new Map<string, number>();
+for (const a of artigos) {
+  for (const t of a.data.tags) contagem.set(t, (contagem.get(t) ?? 0) + 1);
+}
+const tags = [...contagem.entries()].sort((a, b) => b[1] - a[1]);
+---
+
+<Base
+  titulo="Artigos"
+  descricao="Textos sobre backend, Java, Go, concorrencia e as decisoes de design por tras deles."
+>
+  <section class="container secao">
+    <div class="cabecalho-secao">
+      <div>
+        <p class="rotulo-secao">Escrita</p>
+        <h1 class="titulo-pagina">Artigos</h1>
+        <p class="suave descricao-pagina">
+          O que aprendi construindo e mantendo sistemas backend. Sem receita de bolo — o foco e no
+          porque das decisoes.
+        </p>
+      </div>
+      <a href="/rss.xml" class="botao">
+        <Icone nome="rss" tamanho={15} /> Assinar RSS
+      </a>
+    </div>
+
+    {
+      tags.length > 0 && (
+        <div class="filtros" role="group" aria-label="Filtrar artigos por assunto">
+          <button type="button" class="filtro filtro--ativo" data-tag="todas">
+            Todos <span class="filtro__n">{artigos.length}</span>
+          </button>
+          {tags.map(([nome, total]) => (
+            <button type="button" class="filtro" data-tag={nome}>
+              {nome} <span class="filtro__n">{total}</span>
+            </button>
+          ))}
+        </div>
+      )
+    }
+
+    {
+      artigos.length > 0 ? (
+        <div class="lista" id="lista-artigos">
+          {artigos.map((a) => (
+            <div data-tags={a.data.tags.join('|')}>
+              <CartaoArtigo
+                slug={a.id}
+                titulo={a.data.titulo}
+                resumo={a.data.resumo}
+                data={a.data.data}
+                tags={a.data.tags}
+                minutos={tempoLeitura(a.body ?? '')}
+              />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div class="cartao">
+          <p class="suave">
+            Ainda nao ha artigos publicados. Crie um arquivo <code>.md</code> em{' '}
+            <code>src/content/artigos/</code> e faca commit.
+          </p>
+        </div>
+      )
+    }
+
+    <p class="vazio-filtro suave" id="vazio-filtro" hidden>Nenhum artigo com esse assunto ainda.</p>
+  </section>
+</Base>
+
+<script>
+  const botoes = document.querySelectorAll<HTMLButtonElement>('.filtro');
+  const itens = document.querySelectorAll<HTMLElement>('#lista-artigos > [data-tags]');
+  const vazio = document.getElementById('vazio-filtro');
+
+  botoes.forEach((botao) => {
+    botao.addEventListener('click', () => {
+      const alvo = botao.dataset.tag;
+      botoes.forEach((b) => b.classList.toggle('filtro--ativo', b === botao));
+
+      let visiveis = 0;
+      itens.forEach((item) => {
+        const tags = (item.dataset.tags ?? '').split('|');
+        const mostra = alvo === 'todas' || tags.includes(alvo!);
+        item.style.display = mostra ? '' : 'none';
+        if (mostra) visiveis++;
+      });
+
+      if (vazio) vazio.hidden = visiveis > 0;
+    });
+  });
+</script>
+
+<style>
+  .titulo-pagina {
+    font-size: var(--t-3xl);
+    margin-bottom: 0.75rem;
+  }
+
+  .descricao-pagina {
+    max-width: 40rem;
+    font-size: var(--t-sm);
+  }
+
+  .filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .filtro {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--texto-suave);
+    font-size: var(--t-sm);
+    transition: all var(--transicao);
+  }
+  .filtro:hover {
+    border-color: var(--border-forte);
+    color: var(--texto);
+  }
+  .filtro--ativo {
+    background: var(--acento-suave);
+    border-color: color-mix(in srgb, var(--acento) 45%, transparent);
+    color: var(--acento);
+  }
+
+  .filtro__n {
+    font-family: var(--fonte-mono);
+    font-size: var(--t-xs);
+    opacity: 0.7;
+  }
+
+  .vazio-filtro {
+    padding-block: 2rem;
+    font-size: var(--t-sm);
+  }
+  .vazio-filtro[hidden] { display: none; }
+
+  code {
+    font-family: var(--fonte-mono);
+    font-size: 0.85em;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.1em 0.35em;
+    color: var(--acento-2);
+  }
+</style>

@@ -1,0 +1,71 @@
+# ============================================================
+#  Publica o site no GitHub Pages.
+#
+#  Roda em tres situacoes:
+#   1. push na main       -> voce mexeu no site ou publicou um artigo
+#   2. a cada 6 horas     -> re-busca os dados do GitHub e republica,
+#                            e assim repositorios novos aparecem sozinhos
+#   3. manualmente        -> aba Actions > "Publicar site" > Run workflow
+#                            (ou pelo terminal: gh workflow run deploy.yml)
+# ============================================================
+name: Publicar site
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    # minuto 0, a cada 6 horas (UTC). Mude para '0 * * * *' se quiser de hora em hora.
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+# Permissoes minimas necessarias para publicar no Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Nunca deixa dois deploys rodarem ao mesmo tempo
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar o repositorio
+        uses: actions/checkout@v7
+
+      - name: Preparar o Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Gerar o site
+        run: npm run build
+        env:
+          # Eleva o limite da API do GitHub de 60 para 5000 requisicoes/hora
+          # durante o build. E o token automatico do Actions, voce nao precisa criar nada.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Enviar o resultado para o Pages
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: ./dist
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.publicar.outputs.page_url }}
+    steps:
+      - name: Publicar no GitHub Pages
+        id: publicar
+        uses: actions/deploy-pages@v5

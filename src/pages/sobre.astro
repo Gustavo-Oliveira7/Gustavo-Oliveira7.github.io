@@ -1,0 +1,325 @@
+---
+import Base from '../layouts/Base.astro';
+import Icone from '../components/Icone.astro';
+import { site, links, stack } from '../site.config';
+import { experiencias, formacoes, certificacoes } from '../data/experiencia';
+import { buscarPerfil } from '../lib/github';
+
+const perfil = await buscarPerfil();
+---
+
+<Base titulo="Sobre" descricao={`Quem e ${site.nome}: trajetoria, stack e como entrar em contato.`}>
+  <section class="container secao">
+    <div class="topo">
+      <div class="topo__texto">
+        <p class="rotulo-secao">Sobre</p>
+        <h1 class="titulo-pagina">{site.nome}</h1>
+        <p class="cargo mono">{site.cargo}{site.local ? ` · ${site.local}` : ''}</p>
+
+        <div class="bio">
+          {site.bio.map((p) => <p>{p}</p>)}
+          <p>
+            Curto discutir os detalhes que so aparecem em producao: onde o pool de conexoes trava,
+            por que aquele endpoint fica lento no p99, quando vale a pena trocar um framework por
+            cem linhas de codigo proprio. E o tipo de assunto que acaba virando artigo aqui.
+          </p>
+        </div>
+
+        <div class="linha wrap gap topo__acoes">
+          <a href={`mailto:${links.email}`} class="botao botao--primario">
+            <Icone nome="email" tamanho={16} /> Entrar em contato
+          </a>
+          <a href={links.linkedin} target="_blank" rel="noopener" class="botao">
+            <Icone nome="linkedin" tamanho={15} /> LinkedIn
+          </a>
+          <a href={links.github} target="_blank" rel="noopener" class="botao">
+            <Icone nome="github" tamanho={16} /> GitHub
+          </a>
+        </div>
+      </div>
+
+      {
+        perfil && (
+          <aside class="perfil">
+            <img
+              src={perfil.avatar}
+              alt={`Foto de perfil de ${site.nome}`}
+              width="96"
+              height="96"
+              class="perfil__foto"
+              loading="lazy"
+            />
+            <p class="perfil__login mono">@{perfil.login}</p>
+            <dl class="perfil__stats">
+              <div>
+                <dt class="fraco">Repositorios</dt>
+                <dd class="mono">{perfil.reposPublicos}</dd>
+              </div>
+              <div>
+                <dt class="fraco">Seguidores</dt>
+                <dd class="mono">{perfil.seguidores}</dd>
+              </div>
+            </dl>
+          </aside>
+        )
+      }
+    </div>
+  </section>
+
+  <!-- ============ EXPERIENCIA ============ -->
+  {
+    experiencias.length > 0 && (
+      <section class="container secao">
+        <p class="rotulo-secao">Trajetoria</p>
+        <h2 class="mb">Experiencia</h2>
+
+        <div class="linha-tempo">
+          {experiencias.map((e) => (
+            <div class="item">
+              <div class="item__marca" />
+              <div class="item__conteudo">
+                <p class="item__periodo mono fraco">
+                  {e.de} — {e.ate}
+                  {e.local ? ` · ${e.local}` : ''}
+                </p>
+                <h3 class="item__cargo">{e.cargo}</h3>
+                <p class="item__empresa suave">{e.empresa}</p>
+
+                <ul class="item__pontos suave">
+                  {e.pontos.map((p) => (
+                    <li>{p}</li>
+                  ))}
+                </ul>
+
+                {e.stack && e.stack.length > 0 && (
+                  <div class="linha wrap gap-sm item__stack">
+                    {e.stack.map((s) => (
+                      <span class="tag">{s}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  <!-- ============ FORMACAO ============ -->
+  {
+    formacoes.length > 0 && (
+      <section class="container secao--compacta">
+        <p class="rotulo-secao">Formacao</p>
+        <h2 class="mb">Educacao</h2>
+        <div class="grade">
+          {formacoes.map((f) => (
+            <div class="cartao">
+              <p class="mono fraco">
+                {f.de} — {f.ate}
+              </p>
+              <h3 class="formacao__curso">{f.curso}</h3>
+              <p class="suave">{f.instituicao}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  <!-- ============ CERTIFICACOES ============ -->
+  {
+    certificacoes.length > 0 && (
+      <section class="container secao--compacta">
+        <p class="rotulo-secao">Certificacoes</p>
+        <h2 class="mb">Certificados</h2>
+        <div class="grade">
+          {certificacoes.map((c) => (
+            <div class="cartao">
+              <p class="mono fraco">{c.ano}</p>
+              <h3 class="formacao__curso">{c.nome}</h3>
+              <p class="suave">{c.emissor}</p>
+              {c.url && (
+                <a href={c.url} target="_blank" rel="noopener" class="link-acento mt-auto">
+                  Ver credencial <Icone nome="seta" tamanho={15} />
+                </a>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  <!-- ============ STACK ============ -->
+  <section class="container secao">
+    <p class="rotulo-secao">Ferramentas</p>
+    <h2 class="mb">Stack</h2>
+    <div class="grade">
+      {
+        stack.map((grupo) => (
+          <div class="cartao">
+            <p class="stack__titulo mono">{grupo.grupo}</p>
+            <div class="linha wrap gap-sm">
+              {grupo.itens.map((i) => (
+                <span class="tag">{i}</span>
+              ))}
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+</Base>
+
+<style>
+  .topo {
+    display: flex;
+    gap: 3rem;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .topo__texto { flex: 1 1 30rem; }
+
+  .titulo-pagina {
+    font-size: var(--t-3xl);
+    margin-bottom: 0.5rem;
+  }
+
+  .cargo {
+    color: var(--acento);
+    font-size: var(--t-sm);
+    margin-bottom: 1.75rem;
+  }
+
+  .bio {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    color: var(--texto-suave);
+    max-width: 40rem;
+    font-size: var(--t-lg);
+    line-height: 1.7;
+  }
+
+  .topo__acoes { margin-top: 2rem; }
+
+  .perfil {
+    flex: 0 0 auto;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--raio);
+    padding: 1.5rem;
+    text-align: center;
+    min-width: 13rem;
+  }
+
+  .perfil__foto {
+    border-radius: 50%;
+    margin: 0 auto 0.9rem;
+    border: 2px solid var(--border-forte);
+  }
+
+  .perfil__login {
+    font-size: var(--t-sm);
+    color: var(--acento);
+    margin-bottom: 1.15rem;
+  }
+
+  .perfil__stats {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    border-top: 1px solid var(--border);
+    padding-top: 1rem;
+  }
+  .perfil__stats dt {
+    font-size: var(--t-xs);
+    margin-bottom: 0.15rem;
+  }
+  .perfil__stats dd {
+    font-size: var(--t-lg);
+    font-weight: 600;
+  }
+
+  .mb { margin-bottom: 2rem; }
+
+  /* --- Linha do tempo --- */
+  .linha-tempo {
+    display: flex;
+    flex-direction: column;
+    gap: 2.25rem;
+    position: relative;
+  }
+
+  .item {
+    display: flex;
+    gap: 1.5rem;
+    position: relative;
+  }
+
+  .item__marca {
+    flex: 0 0 auto;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--acento);
+    box-shadow: 0 0 0 4px var(--acento-suave);
+    margin-top: 0.55rem;
+    position: relative;
+  }
+  /* linha vertical conectando os pontos */
+  .item:not(:last-child) .item__marca::after {
+    content: '';
+    position: absolute;
+    top: 1.4rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1px;
+    height: calc(100% + 4rem);
+    background: var(--border);
+  }
+
+  .item__conteudo { flex: 1; padding-bottom: 0.25rem; }
+
+  .item__periodo {
+    font-size: var(--t-xs);
+    margin-bottom: 0.4rem;
+  }
+
+  .item__cargo {
+    font-size: var(--t-lg);
+    margin-bottom: 0.1rem;
+  }
+
+  .item__empresa {
+    font-size: var(--t-sm);
+    margin-bottom: 0.9rem;
+  }
+
+  .item__pontos {
+    padding-left: 1.15rem;
+    font-size: var(--t-sm);
+    line-height: 1.65;
+  }
+  .item__pontos li::marker { color: var(--acento); }
+  .item__pontos li + li { margin-top: 0.3rem; }
+
+  .item__stack { margin-top: 1rem; }
+
+  .formacao__curso { font-size: var(--t-base); }
+
+  .stack__titulo {
+    font-size: var(--t-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--acento);
+  }
+
+  @media (max-width: 46rem) {
+    .topo { gap: 2rem; }
+    .perfil { width: 100%; }
+  }
+</style>

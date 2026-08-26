@@ -1,0 +1,39 @@
+---
+import Base from '../layouts/Base.astro';
+import Icone from '../components/Icone.astro';
+---
+
+<Base titulo="Pagina nao encontrada" descricao="Esta rota nao existe.">
+  <section class="container erro">
+    <p class="erro__codigo mono">404</p>
+    <h1>Esta rota nao existe</h1>
+    <p class="suave erro__texto">
+      O endereco que voce tentou abrir nao corresponde a nenhuma pagina do site. Talvez o link esteja
+      antigo ou tenha um erro de digitacao.
+    </p>
+    <div class="linha wrap gap">
+      <a href="/" class="botao botao--primario">
+        Voltar ao inicio <Icone nome="seta" tamanho={16} />
+      </a>
+      <a href="/artigos" class="botao">Ver artigos</a>
+      <a href="/projetos" class="botao">Ver projetos</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .erro {
+    padding-block: 7rem;
+    max-width: 36rem;
+  }
+
+  .erro__codigo {
+    font-size: var(--t-3xl);
+    color: var(--acento);
+    margin-bottom: 0.5rem;
+  }
+
+  .erro__texto {
+    margin-block: 1rem 2rem;
+  }
+</style>

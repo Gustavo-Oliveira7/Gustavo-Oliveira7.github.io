@@ -1,0 +1,101 @@
+---
+import { site } from '../site.config';
+import Cabecalho from '../components/Cabecalho.astro';
+import Rodape from '../components/Rodape.astro';
+import '../styles/global.css';
+
+interface Props {
+  titulo?: string;
+  descricao?: string;
+  /** 'article' nas paginas de artigo, para as meta tags de compartilhamento */
+  tipo?: 'website' | 'article';
+  publicadoEm?: Date;
+}
+
+const {
+  titulo,
+  descricao = site.descricao,
+  tipo = 'website',
+  publicadoEm,
+} = Astro.props;
+
+const tituloCompleto = titulo ? `${titulo} · ${site.nome}` : `${site.nome} — ${site.cargo}`;
+const urlCanonica = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang={site.lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <title>{tituloCompleto}</title>
+    <meta name="description" content={descricao} />
+    <link rel="canonical" href={urlCanonica} />
+    <meta name="author" content={site.nome} />
+
+    <!-- Compartilhamento em redes sociais -->
+    <meta property="og:type" content={tipo} />
+    <meta property="og:title" content={tituloCompleto} />
+    <meta property="og:description" content={descricao} />
+    <meta property="og:url" content={urlCanonica} />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:site_name" content={site.nome} />
+    {publicadoEm && <meta property="article:published_time" content={publicadoEm.toISOString()} />}
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="alternate" type="application/rss+xml" title={`Artigos de ${site.nome}`} href="/rss.xml" />
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- Fontes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <!--
+      Aplica o tema salvo ANTES da primeira pintura da tela.
+      Sem isso o site pisca em branco ao carregar no tema escuro.
+    -->
+    <script is:inline>
+      (function () {
+        try {
+          var salvo = localStorage.getItem('tema');
+          var claro = salvo
+            ? salvo === 'claro'
+            : window.matchMedia('(prefers-color-scheme: light)').matches;
+          if (claro) document.documentElement.setAttribute('data-tema', 'claro');
+        } catch (e) {
+          /* modo privativo bloqueia o localStorage — segue no tema escuro */
+        }
+      })();
+    </script>
+  </head>
+
+  <body>
+    <a href="#conteudo" class="pular-para-conteudo">Pular para o conteudo</a>
+    <Cabecalho />
+    <main id="conteudo">
+      <slot />
+    </main>
+    <Rodape />
+
+    <script>
+      const botao = document.getElementById('alternar-tema');
+      botao?.addEventListener('click', () => {
+        const raiz = document.documentElement;
+        const viraClaro = raiz.getAttribute('data-tema') !== 'claro';
+        raiz.setAttribute('data-tema', viraClaro ? 'claro' : 'escuro');
+        if (!viraClaro) raiz.removeAttribute('data-tema');
+        try {
+          localStorage.setItem('tema', viraClaro ? 'claro' : 'escuro');
+        } catch (e) {
+          /* sem persistencia, o tema vale so para esta aba */
+        }
+      });
+    </script>
+  </body>
+</html>

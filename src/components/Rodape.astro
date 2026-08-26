@@ -1,0 +1,79 @@
+---
+import { site, links } from '../site.config';
+import Icone from './Icone.astro';
+
+const ano = new Date().getFullYear();
+---
+
+<footer class="rodape">
+  <div class="container rodape__interno">
+    <div>
+      <p class="rodape__nome">{site.nome}</p>
+      <p class="fraco">
+        {site.cargo}{site.local ? ` · ${site.local}` : ''}
+      </p>
+    </div>
+
+    <div class="rodape__links">
+      <a href={links.github} target="_blank" rel="noopener" class="rodape__link">
+        <Icone nome="github" tamanho={16} /> GitHub
+      </a>
+      <a href={links.linkedin} target="_blank" rel="noopener" class="rodape__link">
+        <Icone nome="linkedin" tamanho={15} /> LinkedIn
+      </a>
+      <a href={`mailto:${links.email}`} class="rodape__link">
+        <Icone nome="email" tamanho={16} /> E-mail
+      </a>
+      <a href="/rss.xml" class="rodape__link">
+        <Icone nome="rss" tamanho={15} /> RSS
+      </a>
+    </div>
+  </div>
+
+  <div class="container rodape__base">
+    <p class="fraco mono">© {ano} — construido com Astro, publicado no GitHub Pages</p>
+  </div>
+</footer>
+
+<style>
+  .rodape {
+    border-top: 1px solid var(--border);
+    margin-top: 4rem;
+    padding-top: 2.5rem;
+  }
+
+  .rodape__interno {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 2rem;
+    flex-wrap: wrap;
+    padding-bottom: 2rem;
+  }
+
+  .rodape__nome {
+    font-weight: 600;
+    margin-bottom: 0.15rem;
+  }
+
+  .rodape__links {
+    display: flex;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+  }
+
+  .rodape__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: var(--t-sm);
+    color: var(--texto-suave);
+    transition: color var(--transicao);
+  }
+  .rodape__link:hover { color: var(--acento); }
+
+  .rodape__base {
+    border-top: 1px solid var(--border);
+    padding-block: 1.25rem 2rem;
+  }
+</style>

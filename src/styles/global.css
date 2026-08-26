@@ -1,0 +1,345 @@
+/* ============================================================
+   DESIGN SYSTEM
+   Tokens primeiro, componentes depois. Para mudar a identidade
+   visual do site inteiro, mexa apenas nas variaveis do :root.
+   ============================================================ */
+
+:root {
+  /* --- Cores (tema escuro = padrao) --- */
+  --bg: #0b0e14;
+  --bg-elev: #111621;
+  --surface: #141a26;
+  --surface-hover: #1a2131;
+  --border: #222a3a;
+  --border-forte: #2f3a4f;
+
+  --texto: #e7eaf0;
+  --texto-suave: #a3adc2;
+  --texto-fraco: #6b7689;
+
+  --acento: #4fc3dc;        /* ciano — referencia ao Go */
+  --acento-suave: #1e3b47;
+  --acento-2: #f0a45c;      /* ambar — referencia ao Java */
+  --acento-2-suave: #3a2c1a;
+
+  /* --- Tipografia --- */
+  --fonte: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --fonte-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', 'Cascadia Code', monospace;
+
+  --t-xs: 0.75rem;
+  --t-sm: 0.875rem;
+  --t-base: 1rem;
+  --t-lg: 1.125rem;
+  --t-xl: 1.375rem;
+  --t-2xl: 1.75rem;
+  --t-3xl: 2.25rem;
+  --t-4xl: clamp(2.25rem, 5vw, 3.25rem);
+
+  /* --- Espacamento e forma --- */
+  --largura: 68rem;
+  --largura-texto: 44rem;
+  --raio: 10px;
+  --raio-sm: 6px;
+  --sombra: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -12px rgb(0 0 0 / 0.5);
+  --transicao: 160ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+:root[data-tema='claro'] {
+  --bg: #fcfcfd;
+  --bg-elev: #ffffff;
+  --surface: #ffffff;
+  --surface-hover: #f5f7fa;
+  --border: #e4e8ee;
+  --border-forte: #cfd6e0;
+
+  --texto: #10141c;
+  --texto-suave: #4e5768;
+  --texto-fraco: #7b8496;
+
+  --acento: #0d7f9a;
+  --acento-suave: #e2f4f8;
+  --acento-2: #b06a1c;
+  --acento-2-suave: #fdf1e2;
+
+  --sombra: 0 1px 2px rgb(16 20 28 / 0.05), 0 8px 24px -12px rgb(16 20 28 / 0.15);
+}
+
+/* ---------- Reset ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: var(--t-base);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+img, svg { display: block; max-width: 100%; }
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button { font: inherit; cursor: pointer; }
+
+::selection { background: var(--acento-suave); color: var(--acento); }
+
+:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+/* ---------- Layout ---------- */
+.container {
+  width: 100%;
+  max-width: var(--largura);
+  margin-inline: auto;
+  padding-inline: 1.5rem;
+}
+
+main { flex: 1; }
+
+.secao { padding-block: 4.5rem; }
+.secao--compacta { padding-block: 3rem; }
+
+/* ---------- Tipografia ---------- */
+h1, h2, h3, h4 {
+  line-height: 1.2;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+h1 { font-size: var(--t-4xl); }
+h2 { font-size: var(--t-2xl); }
+h3 { font-size: var(--t-xl); }
+
+p { text-wrap: pretty; }
+
+.mono {
+  font-family: var(--fonte-mono);
+  font-size: 0.9em;
+  letter-spacing: -0.01em;
+}
+
+.suave { color: var(--texto-suave); }
+.fraco { color: var(--texto-fraco); font-size: var(--t-sm); }
+
+/* Rotulo de secao: // PROJETOS */
+.rotulo-secao {
+  font-family: var(--fonte-mono);
+  font-size: var(--t-sm);
+  color: var(--acento);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.rotulo-secao::before { content: '//'; opacity: 0.5; }
+
+.cabecalho-secao {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+/* ---------- Componentes ---------- */
+.link-acento {
+  color: var(--acento);
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: gap var(--transicao);
+}
+.link-acento:hover { gap: 0.65rem; }
+
+.botao {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.15rem;
+  border-radius: var(--raio-sm);
+  border: 1px solid var(--border-forte);
+  background: var(--surface);
+  color: var(--texto);
+  font-size: var(--t-sm);
+  font-weight: 550;
+  transition: background var(--transicao), border-color var(--transicao), transform var(--transicao);
+}
+.botao:hover {
+  background: var(--surface-hover);
+  border-color: var(--acento);
+  transform: translateY(-1px);
+}
+.botao--primario {
+  background: var(--acento);
+  border-color: var(--acento);
+  color: var(--bg);
+}
+.botao--primario:hover {
+  background: var(--acento);
+  filter: brightness(1.1);
+  color: var(--bg);
+}
+
+.tag {
+  display: inline-block;
+  font-family: var(--fonte-mono);
+  font-size: var(--t-xs);
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--texto-suave);
+  white-space: nowrap;
+}
+
+.cartao {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--raio);
+  padding: 1.4rem;
+  transition: border-color var(--transicao), transform var(--transicao), box-shadow var(--transicao);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  height: 100%;
+}
+.cartao:hover {
+  border-color: var(--border-forte);
+  transform: translateY(-2px);
+  box-shadow: var(--sombra);
+}
+
+.grade {
+  display: grid;
+  gap: 1.15rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+}
+
+/* ---------- Conteudo de artigo (markdown) ---------- */
+.prosa {
+  max-width: var(--largura-texto);
+  font-size: var(--t-lg);
+  line-height: 1.75;
+  color: var(--texto-suave);
+}
+.prosa > * + * { margin-top: 1.35em; }
+
+.prosa h2 {
+  color: var(--texto);
+  font-size: var(--t-2xl);
+  margin-top: 2.75em;
+  padding-top: 0.4em;
+  scroll-margin-top: 5rem;
+}
+.prosa h3 {
+  color: var(--texto);
+  font-size: var(--t-xl);
+  margin-top: 2em;
+  scroll-margin-top: 5rem;
+}
+
+.prosa strong { color: var(--texto); font-weight: 620; }
+
+.prosa a {
+  color: var(--acento);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  text-decoration-color: color-mix(in srgb, var(--acento) 40%, transparent);
+}
+.prosa a:hover { text-decoration-color: var(--acento); }
+
+.prosa ul, .prosa ol { padding-left: 1.3rem; }
+.prosa li + li { margin-top: 0.4em; }
+.prosa li::marker { color: var(--acento); }
+
+.prosa blockquote {
+  border-left: 2px solid var(--acento);
+  padding-left: 1.2rem;
+  font-style: italic;
+  color: var(--texto-fraco);
+}
+
+.prosa code {
+  font-family: var(--fonte-mono);
+  font-size: 0.85em;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.12em 0.4em;
+  color: var(--acento-2);
+}
+
+.prosa pre {
+  background: var(--bg-elev) !important;
+  border: 1px solid var(--border);
+  border-radius: var(--raio);
+  padding: 1.1rem 1.25rem;
+  overflow-x: auto;
+  font-size: var(--t-sm);
+  line-height: 1.6;
+}
+.prosa pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+}
+
+.prosa hr { border: none; border-top: 1px solid var(--border); }
+
+/* Shiki: troca o tema do bloco de codigo junto com o tema do site */
+:root[data-tema='claro'] .astro-code,
+:root[data-tema='claro'] .astro-code span {
+  color: var(--shiki-light) !important;
+  background-color: transparent !important;
+}
+
+/* ---------- Utilitarios ---------- */
+.pilha { display: flex; flex-direction: column; }
+.linha { display: flex; align-items: center; }
+.gap-sm { gap: 0.5rem; }
+.gap { gap: 1rem; }
+.wrap { flex-wrap: wrap; }
+.mt-auto { margin-top: auto; }
+
+.pular-para-conteudo {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--acento);
+  color: var(--bg);
+  padding: 0.6rem 1rem;
+  z-index: 100;
+}
+.pular-para-conteudo:focus { left: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
